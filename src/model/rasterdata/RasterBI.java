@@ -26,25 +26,22 @@ public class RasterBI implements Raster {
 
     @Override
     public int getWidth() {
-        // TODO
-        return 0;
+        return img.getWidth();
     }
 
     @Override
     public int getHeight() {
-        // TODO
-        return 0;
+        return img.getHeight();
     }
 
     @Override
     public int getPixel(int x, int y) {
-        // TODO
-        return 0;
+        return img.getRGB(x, y);
     }
 
     @Override
     public void setPixel(int x, int y, int color) {
-        // TODO
+        img.setRGB(x, y, color);
     }
 
     public BufferedImage getImg() {

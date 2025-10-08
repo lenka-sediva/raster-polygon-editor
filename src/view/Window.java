@@ -12,7 +12,7 @@ public class Window extends JFrame {
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setResizable(false);
-        setTitle("PGRF1 2025: Task 1 by Jmeno Prijmeni");
+        setTitle("PGRF1 2025: Task 1 by Lenka Šedivá");
 
         add(panel, BorderLayout.CENTER);
         pack();

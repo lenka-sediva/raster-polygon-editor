@@ -51,5 +51,6 @@ public class Controller2D implements Controller {
     @Override
     public void initListeners(Panel panel) {
         // TODO
+
     }
 }

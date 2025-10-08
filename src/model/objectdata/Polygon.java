@@ -23,5 +23,25 @@ public class Polygon {
     }
 
     // TODO addItemToIndex, removeItem, getFirst, getLast, clear
+    public void addItemToIndex() {
+
+    }
+
+    public void removeItem(int index) {
+        polygon.remove(index);
+    }
+
+    public void getLast() {
+
+    }
+
+    public void clear() {
+        polygon.clear();
+    }
+
     // TODO findNearestPoint
+    public int findNearestPoint(Point2D point) {
+
+        return 0;
+    }
 }
