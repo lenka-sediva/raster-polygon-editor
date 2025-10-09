@@ -29,7 +29,10 @@ public class Point2D {
         this.y = y;
     }
 
-    // TODO distanceTo another Point2D
-    // https://en.wikipedia.org/wiki/Euclidean_distance
-
+    // Euiklidovská vzdálenost mezi tímto bodem a jiným bodem
+    public double distanceTo(Point2D other) {
+        int dx = this.x - other.x; // (x1 - x2)
+        int dy = this.y - other.y; // /(y1 - y2)
+        return Math.sqrt(dx * dx + dy * dy); // √(dx² + dy²)
+    }
 }

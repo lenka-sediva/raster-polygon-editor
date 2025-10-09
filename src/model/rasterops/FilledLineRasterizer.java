@@ -10,4 +10,5 @@ public class FilledLineRasterizer extends LineRasterizer{
     // algoritmus
     // výhody
     // nevýhody
+
 }

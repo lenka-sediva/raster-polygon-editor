@@ -41,7 +41,9 @@ public class Polygon {
 
     // TODO findNearestPoint
     public int findNearestPoint(Point2D point) {
-
+        if (polygon.isEmpty()) {
+            return -1;
+        }
         return 0;
     }
 }
