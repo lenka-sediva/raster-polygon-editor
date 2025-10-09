@@ -15,24 +15,40 @@ public class Polygon {
     }
 
     public Point2D getItem(int index) {
-        return polygon.get(index);
+        if (index >= 0 && index < polygon.size()) {
+            return polygon.get(index);
+        }
+        return null;
     }
 
     public int size() {
         return polygon.size();
     }
 
-    // TODO addItemToIndex, removeItem, getFirst, getLast, clear
-    public void addItemToIndex() {
-
+    public void addItemToIndex(int index, Point2D p) {
+        if (index >= 0 && index < polygon.size()) {
+            polygon.add(index, p);
+        }
     }
 
     public void removeItem(int index) {
-        polygon.remove(index);
+        if (index >= 0 && index < polygon.size()) {
+            polygon.remove(index);
+        }
     }
 
-    public void getLast() {
+    public Point2D getFirst() {
+        if (!polygon.isEmpty()) {
+            return polygon.get(0);
+        }
+        return null;
+    }
 
+    public Point2D getLast() {
+        if (!polygon.isEmpty()) {
+            return polygon.get(polygon.size() -1);
+        }
+        return null;
     }
 
     public void clear() {
@@ -44,6 +60,22 @@ public class Polygon {
         if (polygon.isEmpty()) {
             return -1;
         }
-        return 0;
+
+        double minDistance = Double.MAX_VALUE;
+        int nearestIndex = -1;
+
+        for (int i = 0; i < polygon.size(); i++) {
+            Point2D p = polygon.get(i);
+            double dx = p.getX() - point.getX();
+            double dy = p.getY() - point.getY();
+            double distance = Math.sqrt(dx*dx + dy*dy);
+
+            if(distance < minDistance) {
+                minDistance = distance;
+                nearestIndex = i;
+            }
+        }
+
+        return nearestIndex;
     }
 }
