@@ -60,8 +60,17 @@ public class Controller2D implements Controller {
             @Override
             public void mouseReleased(MouseEvent e) {
                 Point2D newPoint = new Point2D(e.getX(), e.getY());
-                polygon.addItem(newPoint);
-                drawScene();
+                Line tempLine = new Line(polygon.getLast(), newPoint);
+
+                if (isRasterizingWithShift) {
+                    Point2D suitablePoint = findSuitablePoint(tempLine, polygon);
+                    polygon.addItem(suitablePoint);
+                    drawScene();
+                } else {
+                    polygon.addItem(newPoint);
+                    drawScene();
+                }
+                panel.repaint();
             }
         });
 
@@ -70,14 +79,21 @@ public class Controller2D implements Controller {
             @Override
             public void mouseDragged(MouseEvent e) {
                 // zobrazí dočasné čáry
-                if (isRasterizingWithShift) return;
                 if(polygon.size() < 1) return;
-
                 drawScene();
 
+                Point2D newPoint = new Point2D(e.getX(), e.getY());
+                Line tempLine = new Line(polygon.getLast(), newPoint);
+
                 liner.setColor(previewColor);
-                liner.rasterize(new Line(polygon.getFirst(), new Point2D(e.getX(), e.getY())));
-                liner.rasterize(new Line(polygon.getLast(), new Point2D(e.getX(), e.getY())));
+
+                if(isRasterizingWithShift) {
+                    liner.rasterize(new Line(polygon.getFirst(), findSuitablePoint(tempLine, polygon)));
+                    liner.rasterize(new Line(polygon.getLast(), findSuitablePoint(tempLine, polygon)));
+                } else {
+                    liner.rasterize(new Line(polygon.getFirst(), new Point2D(e.getX(), e.getY())));
+                    liner.rasterize(new Line(polygon.getLast(), new Point2D(e.getX(), e.getY())));
+                }
 
                 liner.setColor(polygonColor);
                 panel.repaint();
@@ -94,12 +110,39 @@ public class Controller2D implements Controller {
                     lines.clear();
                     panel.repaint();
                 } else if (e.getKeyCode() == KeyEvent.VK_SHIFT) {
-                    // TODO kreslení vodorovných, svislých a úhlopříčných úseček
                     isRasterizingWithShift = true;
+                }
+            }
 
+            @Override
+            public void keyReleased(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_SHIFT) {
+                    isRasterizingWithShift = false;
                 }
             }
         });
+    }
+
+    private Point2D findSuitablePoint(Line line, Polygon polygon) {
+        Point2D start = line.getStart();
+        Point2D cursor = line.getEnd();
+
+        // proměnné pro přehlednější počítání s Point2D diagonal
+        double dx = cursor.getX() - start.getX();
+        double dy = cursor.getY() - start.getY();
+        double min = Math.min(Math.abs(dx), Math.abs(dy));
+
+        // možné cílové body: vodorovný, svislý, diagonální (45°)
+        Point2D horizontal = new Point2D(cursor.getX(), start.getY());
+        Point2D vertical = new Point2D(start.getX(), cursor.getY());
+        Point2D diagonal = new Point2D(start.getX() + Math.signum(dx) * min, start.getY() + Math.signum(dy) * min);
+
+        // najití nejbližšího z těchto bodů k pozici kurzoru
+        Point2D[] candidates = { horizontal, vertical, diagonal };
+        int nearestIndex = polygon.findNearestPoint(cursor, candidates);
+        Point2D nearest = candidates[nearestIndex];
+
+        return nearest;
     }
 
     private void drawScene() {

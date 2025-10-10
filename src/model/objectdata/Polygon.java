@@ -55,19 +55,16 @@ public class Polygon {
         polygon.clear();
     }
 
-    public int findNearestPoint(Point2D point) {
+    public int findNearestPoint(Point2D cursor, Point2D[] points) {
         if (polygon.isEmpty()) {
             return -1;
         }
 
         double minDistance = Double.MAX_VALUE;
-        int nearestIndex = -1;
+        int nearestIndex = 0;
 
-        for (int i = 0; i < polygon.size(); i++) {
-            Point2D p = polygon.get(i);
-            double dx = p.getX() - point.getX();
-            double dy = p.getY() - point.getY();
-            double distance = Math.sqrt(dx*dx + dy*dy);
+        for (int i = 0; i < points.length; i++) {
+            double distance = cursor.distanceTo(points[i]);
 
             if(distance < minDistance) {
                 minDistance = distance;
