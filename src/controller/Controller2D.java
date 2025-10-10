@@ -3,6 +3,7 @@ package controller;
 import model.objectdata.Line;
 import model.objectdata.Point2D;
 import model.objectdata.Polygon;
+import model.rasterops.FilledLineRasterizer;
 import model.rasterops.LineRasterizer;
 import model.rasterops.LineRasterizerBresenham;
 import model.rasterops.PolygonRasterizer;
@@ -26,7 +27,7 @@ public class Controller2D implements Controller {
     public Controller2D(Panel panel) {
         this.panel = panel;
 
-        liner = new LineRasterizerBresenham(panel.getRaster());
+        liner = new FilledLineRasterizer(panel.getRaster());
         liner.setColor(polygonColor);
 
         this.lines = new ArrayList<>();
@@ -44,12 +45,18 @@ public class Controller2D implements Controller {
     public void initListeners(Panel panel) {
         // kliknutí myši
         panel.addMouseListener(new MouseAdapter() {
+            // přidání nového bodu
             @Override
             public void mousePressed(MouseEvent e) {
-                // přidání nového bodu
                 Point2D newPoint = new Point2D(e.getX(), e.getY());
                 polygon.addItem(newPoint);
+                redrawPolygon();
+            }
 
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                Point2D newPoint = new Point2D(e.getX(), e.getY());
+                polygon.addItem(newPoint);
                 redrawPolygon();
             }
         });
@@ -58,6 +65,15 @@ public class Controller2D implements Controller {
         panel.addMouseMotionListener(new MouseMotionAdapter() {
             @Override
             public void mouseMoved(MouseEvent e) {
+                drawPreview(e);
+            }
+
+            @Override
+            public void mouseDragged(MouseEvent e) {
+                drawPreview(e);
+            }
+
+            private void drawPreview(MouseEvent e) {
                 // zobrazí dočasné čáry
                 if(polygon.size() < 1) return;
 
