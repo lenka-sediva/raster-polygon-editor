@@ -55,7 +55,6 @@ public class Polygon {
         polygon.clear();
     }
 
-    // TODO findNearestPoint
     public int findNearestPoint(Point2D point) {
         if (polygon.isEmpty()) {
             return -1;

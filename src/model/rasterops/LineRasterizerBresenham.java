@@ -17,7 +17,7 @@ public class LineRasterizerBresenham extends LineRasterizer {
 
         int sx = x1 < x2 ? 1 : -1; // směr po x
         int sy = y1 < y2 ? 1 : -1; // směr po y
-        int err = dx -dy;
+        int err = dx - dy;
 
         while (true) {
             raster.setPixel(x1, y1, color.getRGB());

@@ -4,7 +4,7 @@ import model.objectdata.Line;
 import model.objectdata.Point2D;
 import model.objectdata.Polygon;
 import model.rasterops.LineRasterizer;
-import model.rasterops.LineRasterizerGraphics;
+import model.rasterops.LineRasterizerBresenham;
 import model.rasterops.PolygonRasterizer;
 import view.Panel;
 
@@ -17,13 +17,18 @@ public class Controller2D implements Controller {
 
     private final Panel panel;
     private LineRasterizer liner;
+
     private Polygon polygon = new Polygon();
+    private List<Line> lines;
     private Color color;
-    private boolean dragging = false;
-    private int startX, startY;
 
     public Controller2D(Panel panel) {
         this.panel = panel;
+
+        liner = new LineRasterizerBresenham(panel.getRaster());
+        liner.setColor(color);
+
+        this.lines = new ArrayList<>();
 
         initObjects();
         initListeners(panel);
@@ -32,72 +37,48 @@ public class Controller2D implements Controller {
     @Override
     public void initObjects() {
         // TODO
-
-        liner = new LineRasterizerGraphics(panel.getRaster());
-
-        // Prikladove vykreslenie polygonu
-        Line l1 = new Line(new Point2D(50,50), new Point2D(200, 20));
-        Line l2 = new Line(new Point2D(200, 20), new Point2D(250, 130));
-        Line l3 = new Line(new Point2D(250,130), new Point2D(400, 280));
-        Line l4 = new Line(new Point2D(400,280), new Point2D(100, 280));
-        Line l5 = new Line(new Point2D(100, 280), new Point2D(50, 50));
-
-        List<Line> listofLines = new ArrayList<>();
-        listofLines.add(l1);
-        listofLines.add(l2);
-        listofLines.add(l3);
-        listofLines.add(l4);
-        listofLines.add(l5);
-
-        PolygonRasterizer polygonRasterizer = new PolygonRasterizer(liner);
-        polygonRasterizer.rasterize(listofLines);
-
     }
 
     @Override
     public void initListeners(Panel panel) {
-        // TODO
-
         panel.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                // první bod
-                startX = e.getX();
-                startY = e.getY();
-                dragging = true;
-            }
+                Point2D newPoint = new Point2D(e.getX(), e.getY());
+                polygon.addItem(newPoint);
 
-            @Override
-            public void mouseReleased(MouseEvent e) {
-                // potvrzení druhého bodu
-                if(dragging) {
-                    dragging = false;
-                    int endX = e.getX();
-                    int endY = e.getY();
+                Point2D firstPoint = polygon.getFirst();
+                Point2D lastPoint = polygon.getLast();
+                int size = polygon.size();
 
-                    // přidání úsečky do Polygonu (seznam)
-                    polygon.addItem(new Point2D(endX,endY));
-
-                    // vykreslení potvrzené čáry
-                    liner.rasterize(startX, startY, endX, endY, color);
-                    panel.repaint();
+                if (size > 1) {
+                    // spoj s předchozím bodem
+                    Point2D previousPoint = polygon.getItem(size -2);
+                    lines.add(new Line(previousPoint, lastPoint));
                 }
-            }
-        });
 
-        panel.addMouseMotionListener(new MouseMotionAdapter() {
-            @Override
-            public void mouseDragged(MouseEvent e) {
-                if(!dragging) return;
+                // pokud máme alespoň 3 body, uzavři polygon
+                if (size >= 3) {
+                    if (!lines.isEmpty()) {
+                        lines.remove(lines.size() - 1);
+                    }
+                    lines.add(new Line(lastPoint, firstPoint));
+                }
 
-                int currentX = e.getX();
-                int currentY = e.getY();
+                if (size < 2) {
+                    drawScene();
+                    return;
+                }
 
-                
+                // přidej hrany mezi sousedními body
+                for (int i = 0; i < size -1; i++) {
+                    lines.add(new Line(polygon.getItem(i), polygon.getItem(i+1)));
+                }
 
-                // vykreslení pružné čáry
-                liner.rasterize(startX, startY, currentX, currentY, color);
-                panel.repaint();
+                // uzavři polygon: poslední -> první
+                lines.add(new Line(lastPoint, firstPoint));
+
+                drawScene();
             }
         });
 
@@ -107,8 +88,21 @@ public class Controller2D implements Controller {
             public void keyPressed(KeyEvent e) {
                 if(e.getKeyCode() == KeyEvent.VK_C) {
                     panel.clear();
+                    polygon.clear();
+                    lines.clear();
+                    panel.repaint();
                 }
             }
         });
     }
+
+    private void drawScene() {
+        panel.getRaster().clear();
+
+        for (Line line : lines)
+            liner.rasterize(line);
+
+        panel.repaint();
+    }
+
 }
