@@ -17,24 +17,24 @@ public class LineRasterizerBresenham extends LineRasterizer {
 
         int sx = x1 < x2 ? 1 : -1; // směr po x
         int sy = y1 < y2 ? 1 : -1; // směr po y
-        int err = dx - dy;
+        int err = dx - dy; // počáteční chyba
 
         while (true) {
             raster.setPixel(x1, y1, color.getRGB());
 
             if (x1 == x2 && y1 == y2) {
-                break;
+                break; // konec při dosažení koncového bodu
             }
 
             int e2 = 2 * err;
 
             if (e2 > -dy) {
                 err -= dy;
-                x1 += sx;
+                x1 += sx; // posun po x
             }
             if (e2 < dx) {
                 err += dx;
-                y1 += sy;
+                y1 += sy; // posun po y
             }
         }
     }

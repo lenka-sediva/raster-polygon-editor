@@ -5,7 +5,6 @@ import model.objectdata.Point2D;
 import model.objectdata.Polygon;
 import model.rasterops.FilledLineRasterizer;
 import model.rasterops.LineRasterizer;
-import model.rasterops.LineRasterizerBresenham;
 import model.rasterops.PolygonRasterizer;
 import view.Panel;
 
@@ -18,6 +17,8 @@ public class Controller2D implements Controller {
 
     private final Panel panel;
     private LineRasterizer liner;
+    private PolygonRasterizer polygonRasterizer;
+    private boolean isRasterizingWithShift = false;
 
     private Polygon polygon = new Polygon();
     private List<Line> lines;
@@ -28,6 +29,7 @@ public class Controller2D implements Controller {
         this.panel = panel;
 
         liner = new FilledLineRasterizer(panel.getRaster());
+        polygonRasterizer = new PolygonRasterizer(liner);
         liner.setColor(polygonColor);
 
         this.lines = new ArrayList<>();
@@ -48,36 +50,30 @@ public class Controller2D implements Controller {
             // přidání nového bodu
             @Override
             public void mousePressed(MouseEvent e) {
-                Point2D newPoint = new Point2D(e.getX(), e.getY());
-                polygon.addItem(newPoint);
-                redrawPolygon();
+                if (polygon.size() == 0) {
+                    Point2D newPoint = new Point2D(e.getX(), e.getY());
+                    polygon.addItem(newPoint);
+                    drawScene();
+                }
             }
 
             @Override
             public void mouseReleased(MouseEvent e) {
                 Point2D newPoint = new Point2D(e.getX(), e.getY());
                 polygon.addItem(newPoint);
-                redrawPolygon();
+                drawScene();
             }
         });
 
         // pohyb myši
         panel.addMouseMotionListener(new MouseMotionAdapter() {
             @Override
-            public void mouseMoved(MouseEvent e) {
-                drawPreview(e);
-            }
-
-            @Override
             public void mouseDragged(MouseEvent e) {
-                drawPreview(e);
-            }
-
-            private void drawPreview(MouseEvent e) {
                 // zobrazí dočasné čáry
+                if (isRasterizingWithShift) return;
                 if(polygon.size() < 1) return;
 
-                redrawPolygon();
+                drawScene();
 
                 liner.setColor(previewColor);
                 liner.rasterize(new Line(polygon.getFirst(), new Point2D(e.getX(), e.getY())));
@@ -97,39 +93,18 @@ public class Controller2D implements Controller {
                     polygon.clear();
                     lines.clear();
                     panel.repaint();
+                } else if (e.getKeyCode() == KeyEvent.VK_SHIFT) {
+                    // TODO kreslení vodorovných, svislých a úhlopříčných úseček
+                    isRasterizingWithShift = true;
+
                 }
             }
         });
     }
 
-    private void redrawPolygon() {
-        lines.clear(); // vymaž staré hrany
-
-        int size = polygon.size();
-        if (size < 2) {
-            drawScene();
-            return;
-        }
-
-        // přidání hran mezi sousedními body
-        for (int i = 0; i < size - 1; i++) {
-            lines.add(new Line(polygon.getItem(i), polygon.getItem(i + 1)));
-        }
-
-        // uzavření polygonu, pokud má alespoň 3 body
-        if (size >= 3) {
-            lines.add(new Line(polygon.getLast(), polygon.getFirst()));
-        }
-        drawScene();
-    }
-
     private void drawScene() {
         panel.getRaster().clear();
-
-        for (Line line : lines)
-            liner.rasterize(line);
-
+        polygonRasterizer.rasterize(polygon);
         panel.repaint();
     }
-
 }

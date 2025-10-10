@@ -11,7 +11,5 @@ public class App {
             // new Controller3D(window.getPanel());
             window.setVisible(true); // zobrazit okno
         });
-
-
     }
 }

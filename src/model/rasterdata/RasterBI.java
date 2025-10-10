@@ -41,6 +41,7 @@ public class RasterBI implements Raster {
 
     @Override
     public void setPixel(int x, int y, int color) {
+        // TODO ošetřit zápis mimo raster
         img.setRGB(x, y, color);
     }
 
