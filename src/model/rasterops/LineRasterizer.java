@@ -23,10 +23,6 @@ public abstract class LineRasterizer {
         drawLine(x1, y1, x2, y2);
     }
 
-    public void rasterizeWithShift(int x1, int y1) {
-
-    }
-
     protected void drawLine(int x1, int y1, int x2, int y2) {
 
     }
