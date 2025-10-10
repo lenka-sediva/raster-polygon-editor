@@ -15,7 +15,6 @@ public abstract class LineRasterizer {
     }
 
     public void rasterize(Line line) {
-        setColor(new Color(line.getColor()));
         drawLine(line.getStart().x, line.getStart().y, line.getEnd().x, line.getEnd().y);
     }
 

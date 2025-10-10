@@ -20,13 +20,14 @@ public class Controller2D implements Controller {
 
     private Polygon polygon = new Polygon();
     private List<Line> lines;
-    private Color color;
+    private Color polygonColor = Color.YELLOW;
+    private Color previewColor = Color.RED;
 
     public Controller2D(Panel panel) {
         this.panel = panel;
 
         liner = new LineRasterizerBresenham(panel.getRaster());
-        liner.setColor(color);
+        liner.setColor(polygonColor);
 
         this.lines = new ArrayList<>();
 
@@ -41,44 +42,33 @@ public class Controller2D implements Controller {
 
     @Override
     public void initListeners(Panel panel) {
+        // kliknutí myši
         panel.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
+                // přidání nového bodu
                 Point2D newPoint = new Point2D(e.getX(), e.getY());
                 polygon.addItem(newPoint);
 
-                Point2D firstPoint = polygon.getFirst();
-                Point2D lastPoint = polygon.getLast();
-                int size = polygon.size();
+                redrawPolygon();
+            }
+        });
 
-                if (size > 1) {
-                    // spoj s předchozím bodem
-                    Point2D previousPoint = polygon.getItem(size -2);
-                    lines.add(new Line(previousPoint, lastPoint));
-                }
+        // pohyb myši
+        panel.addMouseMotionListener(new MouseMotionAdapter() {
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                // zobrazí dočasné čáry
+                if(polygon.size() < 1) return;
 
-                // pokud máme alespoň 3 body, uzavři polygon
-                if (size >= 3) {
-                    if (!lines.isEmpty()) {
-                        lines.remove(lines.size() - 1);
-                    }
-                    lines.add(new Line(lastPoint, firstPoint));
-                }
+                redrawPolygon();
 
-                if (size < 2) {
-                    drawScene();
-                    return;
-                }
+                liner.setColor(previewColor);
+                liner.rasterize(new Line(polygon.getFirst(), new Point2D(e.getX(), e.getY())));
+                liner.rasterize(new Line(polygon.getLast(), new Point2D(e.getX(), e.getY())));
 
-                // přidej hrany mezi sousedními body
-                for (int i = 0; i < size -1; i++) {
-                    lines.add(new Line(polygon.getItem(i), polygon.getItem(i+1)));
-                }
-
-                // uzavři polygon: poslední -> první
-                lines.add(new Line(lastPoint, firstPoint));
-
-                drawScene();
+                liner.setColor(polygonColor);
+                panel.repaint();
             }
         });
 
@@ -94,6 +84,27 @@ public class Controller2D implements Controller {
                 }
             }
         });
+    }
+
+    private void redrawPolygon() {
+        lines.clear(); // vymaž staré hrany
+
+        int size = polygon.size();
+        if (size < 2) {
+            drawScene();
+            return;
+        }
+
+        // přidání hran mezi sousedními body
+        for (int i = 0; i < size - 1; i++) {
+            lines.add(new Line(polygon.getItem(i), polygon.getItem(i + 1)));
+        }
+
+        // uzavření polygonu, pokud má alespoň 3 body
+        if (size >= 3) {
+            lines.add(new Line(polygon.getLast(), polygon.getFirst()));
+        }
+        drawScene();
     }
 
     private void drawScene() {
