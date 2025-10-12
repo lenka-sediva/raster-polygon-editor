@@ -26,7 +26,7 @@ public class Polygon {
     }
 
     public void addItemToIndex(int index, Point2D p) {
-        if (index >= 0 && index < polygon.size()) {
+        if (index >= 0 && index <= polygon.size()) {
             polygon.add(index, p);
         }
     }
@@ -56,6 +56,10 @@ public class Polygon {
     }
 
     public int findNearestPoint(Point2D cursor, Point2D[] points) {
+        if (points == null || points.length == 0) {
+            return -1;
+        }
+
         if (polygon.isEmpty()) {
             return -1;
         }
@@ -73,5 +77,24 @@ public class Polygon {
         }
 
         return nearestIndex;
+    }
+
+    // nalezení nejbližší hrany polygonu k bodu
+    public static int findNearestLine(Point2D cursor, Polygon polygon) {
+        if (polygon.size() < 2) return -1;
+
+        double minDist = Double.MAX_VALUE;
+        int nearestLineIndex = -1;
+
+        for (int i = 0; i < polygon.size(); i++) {
+            Point2D a = polygon.getItem(i);
+            Point2D b = polygon.getItem((i + 1) % polygon.size());
+            double dist = Point2D.distancePointToLine(cursor, a, b);
+            if (dist < minDist) {
+                minDist = dist;
+                nearestLineIndex = i;
+            }
+        }
+        return nearestLineIndex;
     }
 }
