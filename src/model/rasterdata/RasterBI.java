@@ -6,7 +6,7 @@ import java.awt.image.BufferedImage;
 public class RasterBI implements Raster {
 
     private final BufferedImage img;
-    private final Color backgroundColor = Color.BLACK;
+    public static Color backgroundColor = Color.BLACK;
 
     public RasterBI(int width, int height) {
         this.img = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
@@ -41,7 +41,7 @@ public class RasterBI implements Raster {
 
     @Override
     public void setPixel(int x, int y, int color) {
-        // TODO ošetření zápisu mimo raster
+        // ošetření zápisu mimo raster
         if (x < 0 || y < 0 || x >= img.getWidth() || y >= img.getHeight()) {
             return;
         }

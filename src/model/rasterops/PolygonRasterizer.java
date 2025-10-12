@@ -33,18 +33,16 @@ public class PolygonRasterizer {
     }
 
     public void rasterize(Polygon polygon) {
-        if(polygon.size() > 2) {
-            for (int i = 0; i < polygon.size(); i++) {
-                Point2D p1 = polygon.getItem(i); // zaciatocny bod usecky
+        for (int i = 0; i < polygon.size(); i++) {
+            Point2D p1 = polygon.getItem(i); // zaciatocny bod usecky
 
-                Point2D p2 = polygon.getItem((i + 1) % polygon.size()); // koncovy bod usecky
-                // bacha na vykreslenie posledneho bodu polygonu, s modulom si zaistim navrat k prvemu bodu polygonu
+            Point2D p2 = polygon.getItem((i + 1) % polygon.size()); // koncovy bod usecky
+            // bacha na vykreslenie posledneho bodu polygonu, s modulom si zaistim navrat k prvemu bodu polygonu
 
-                liner.drawLine(
-                        p1.getX(), p1.getY(),
-                        p2.getX(), p2.getY()
-                );
-            }
+            liner.drawLine(
+                    p1.getX(), p1.getY(),
+                    p2.getX(), p2.getY()
+            );
         }
     }
 }
