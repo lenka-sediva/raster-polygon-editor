@@ -2,6 +2,27 @@ package model.rasterops;
 
 import model.rasterdata.Raster;
 
+/**
+ * Triviální algoritmus
+ *
+ * Popis:
+ * - založený na parametrickém vyjádření úsečky
+ * - vypočítá směrnici a prochází úsečku po malých krocích podle větší z hodnot
+ * - pro každý krok se určí souřadnice x a y pomocí přímky a vykreslí se pixel
+ * - používá reálná (desetinná) čísla, která se zaokrouhlují na nejbližší celočíselnou pozici v rastru
+ *
+ * Výhody:
+ * - jednoduchý na pochopení a implementaci
+ * - přesná poloha pixelů umožňuje snadno doplnit interpolaci barev nebo dalších hodnot
+ * - použitelný i pro složitější křivky
+ *
+ * Nevýhody:
+ * - pomalejší než Bresenhamův, protože využívá desetinné operace
+ * - může způsobovat drobné chyby zaokrouhlení
+ * - je to funkce, tzn. jednomu x odpovídá právě jedno y, svislá úsečka se tedy řeší zvlášť
+ * - není efektivní pro reálné aplikace, používá se hlavně pro demonstraci principu rasterizace
+ */
+
 public class LineRasterizerTrivial extends LineRasterizer {
 
     public LineRasterizerTrivial(Raster raster) {
@@ -9,29 +30,14 @@ public class LineRasterizerTrivial extends LineRasterizer {
     }
 
     @Override
-    public void drawLine(int x1, int y1, int x2, int y2) {
-        // 1. vypocitaj dx = (c2 - c1), dy = (y2 - y1)
-        // 2. if abs(dx) > abs(dy) (iterate by x)
-        // 3. if x1 > x2:
-        // prohod (x1, r1) s (x2, y2) - draw(x2, y2, x1, y1)
-        // else
-        // double k = (double) (y2 - y1) / (x2 - x1);
-        // double q = y1 - (k * x1);
-        // for (int x = x1; x <= x2; x++) {
-        //      int y = (int) (k * x + q);
-        //      raster.setColor(x, y, color);
-        // }
-        // else
-        // 4. if r1 > r2:
-        // prohod (x1, y1) s (x2, y2)
-        // stejnej algoritmus s prohozenim y and x
+    protected void drawLine(int x1, int y1, int x2, int y2) {
+        float dx = x2 - x1;
+        float dy = y2 - y1;
 
-        double dx = (double) (x2 - x1);
-        double dy = (double) (y2 - y1);
-
-        // pokud je úsečka více vodorovná
+        // určení orientace úsečky - pokud je více vodorovná nebo svislá
         if (Math.abs(dx) > Math.abs(dy)) {
-            // zajisti průchod od menšího x k většímu
+            // úsečka je víc vodorovná = řídící osa x
+            // prohodí koncové body, aby se kreslilo zleva doprava
             if (x1 > x2) {
                 int tempX = x1;
                 x1 = x2;
@@ -41,35 +47,38 @@ public class LineRasterizerTrivial extends LineRasterizer {
                 y1 = y2;
                 y2 = tempY;
 
-                dx = (double) (x2 - x1);
-                dy = (double) (y2 - y1);
+                dx = x2 - x1;
+                dy = y2 - y1;
             }
 
-            double k = dy / dx;
-            double q = y1 - k * x1;
+            float k = dy / dx;
+            float q = y1 - k * x1;
 
-            for (int x = x1; x <= x2; x++) {
-                int y = (int) Math.round(k * x + q);
+            for (int x = x1; x < x2; x++) {
+                int y = Math.round(k * x + q); // zaokrouhlení na nejbližší pixel
                 raster.setPixel(x, y, color.getRGB());
             }
-        } else { // více svislá úsečka
-            // zajisti průchod od menšího y k většímu
+        } else {
+            // úsečka je více svislá = řídící osa y
+            // prohodí koncové body, aby se kreslilo shora dolů
             if (y1 > y2) {
                 int tempX = x1;
                 x1 = x2;
                 x2 = tempX;
+
                 int tempY = y1;
                 y1 = y2;
                 y2 = tempY;
-                dx = (double) (x2 - x1);
-                dy = (double) (y2 - y1);
+
+                dx = x2 - x1;
+                dy = y2 - y1;
             }
 
-            double k = dx / dy;
-            double q = x1 - k * y1;
+            float k = dx / dy;
+            float q = x1 - k * y1;
 
-            for (int y=y1; y <= y2; y++) {
-                int x = (int) Math.round(k * y + q);
+            for (int y = y1; y < y2; y++) {
+                int x = Math.round(k * y + q);
                 raster.setPixel(x, y, color.getRGB());
             }
         }
