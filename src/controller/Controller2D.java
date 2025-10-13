@@ -239,10 +239,10 @@ public class Controller2D implements Controller {
     }
 
     private void toggleBackground(){
-        if(RasterBI.backgroundColor == Color.WHITE){
-            RasterBI.backgroundColor = Color.BLACK;
+        if(RasterBI.getBackgroundColor().equals(Color.WHITE)){
+            RasterBI.setBackgroundColor(Color.BLACK);
         } else {
-            RasterBI.backgroundColor = Color.WHITE;
+            RasterBI.setBackgroundColor(Color.WHITE);
         }
         drawScene();
     }

@@ -6,7 +6,7 @@ import java.awt.image.BufferedImage;
 public class RasterBI implements Raster {
 
     private final BufferedImage img;
-    public static Color backgroundColor = Color.BLACK;
+    private static Color backgroundColor = Color.BLACK;
 
     public RasterBI(int width, int height) {
         this.img = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
@@ -50,5 +50,13 @@ public class RasterBI implements Raster {
 
     public BufferedImage getImg() {
         return img;
+    }
+
+    public static Color getBackgroundColor() {
+        return backgroundColor;
+    }
+
+    public static void setBackgroundColor(Color backgroundColor) {
+        RasterBI.backgroundColor = backgroundColor;
     }
 }
