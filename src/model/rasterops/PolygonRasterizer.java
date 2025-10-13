@@ -21,6 +21,10 @@ public class PolygonRasterizer {
         this.liner = liner;
     }
 
+    public void setLiner(LineRasterizer liner) {
+        this.liner = liner;
+    }
+
     public void rasterize(List<Line> listOfLines){
         for(Line line : listOfLines) {
             liner.drawLine(

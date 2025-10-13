@@ -5,8 +5,7 @@ import model.rasterdata.Raster;
 import java.awt.*;
 
 /**
- * Třída DashedLineRasterizer vykresluje čárkované úsečky
- * Ten dědí ze třídy LineRasterizerTrivial, která je potomkem třídy LineRasterizer
+ * Třída DashedLineRasterizer vykresluje čárkované úsečky pomocí DDA algoritmu
  * Navíc podporuje gradient díky atributu gradient datového typu Gradient ze třídy LineRasterizer
  */
 
@@ -28,7 +27,6 @@ public class DashedLineRasterizer extends LineRasterizer {
     public void drawLine(int x1, int y1, int x2, int y2) {
         double dx = x2 - x1;
         double dy = y2 - y1;
-
         int steps = (int) Math.max(Math.abs(dx), Math.abs(dy));
 
         if (steps == 0) {

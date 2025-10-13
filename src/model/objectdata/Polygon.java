@@ -97,4 +97,26 @@ public class Polygon {
         }
         return nearestLineIndex;
     }
+
+    public Point2D findNearestPointToAxisCandidates(Line line) {
+        Point2D start = line.getStart();
+        Point2D cursor = line.getEnd();
+
+        // proměnné pro přehlednější počítání s Point2D diagonal
+        double dx = cursor.getX() - start.getX();
+        double dy = cursor.getY() - start.getY();
+        double min = Math.min(Math.abs(dx), Math.abs(dy));
+
+        // možné cílové body: vodorovný, svislý, diagonální (45°)
+        Point2D horizontal = new Point2D(cursor.getX(), start.getY());
+        Point2D vertical = new Point2D(start.getX(), cursor.getY());
+        Point2D diagonal = new Point2D(start.getX() + Math.signum(dx) * min, start.getY() + Math.signum(dy) * min);
+
+        // nalezení nejbližšího z těchto bodů k pozici kurzoru
+        Point2D[] candidates = { horizontal, vertical, diagonal };
+        int nearestIndex = findNearestPoint(cursor, candidates);
+        Point2D nearest = candidates[nearestIndex];
+
+        return nearest;
+    }
 }

@@ -25,6 +25,7 @@ public class Controller2D implements Controller {
     private List<Line> lines;
     private Color polygonColor = Color.BLUE;
     private Color previewColor = Color.RED;
+    private final DashedLineRasterizer dashedLiner;
 
     // úprava tažením
     private int draggedPointIndex = -1; // žádný bod není vybraný
@@ -38,6 +39,11 @@ public class Controller2D implements Controller {
         liner.setColor(polygonColor);
 
         this.lines = new ArrayList<>();
+
+        this.dashedLiner = new DashedLineRasterizer(panel.getRaster());
+        dashedLiner.setColor(previewColor);
+        dashedLiner.setDashPattern(6, 4);
+        dashedLiner.setGradient(Color.BLUE, Color.RED); // použití gradientu
 
         initObjects();
         initListeners(panel);
@@ -86,7 +92,7 @@ public class Controller2D implements Controller {
                 Line tempLine = new Line(polygon.getLast(), newPoint);
 
                 if (isRasterizingWithShift) {
-                    Point2D suitablePoint = findSuitablePoint(tempLine, polygon);
+                    Point2D suitablePoint = polygon.findNearestPointToAxisCandidates(tempLine);
                     polygon.addItem(suitablePoint);
 
                 } else {
@@ -110,20 +116,13 @@ public class Controller2D implements Controller {
                     return; // když se dragguje vrchol, nechceme pružnou čáru
                 }
 
-                if(polygon.size() < 1) return;
-
                 // vykreslení pružné dashed čáry
                 Point2D newPoint = new Point2D(e.getX(), e.getY());
-                DashedLineRasterizer dashedLiner = new DashedLineRasterizer(panel.getRaster());
-                dashedLiner.setColor(previewColor);
-                dashedLiner.setDashPattern(6, 4);
-                dashedLiner.setGradient(Color.BLUE, Color.RED); // použití gradientu
-
                 Line tempLine = new Line(polygon.getLast(), newPoint);
 
                 if (isRasterizingWithShift) {
-                    dashedLiner.rasterize(new Line(polygon.getFirst(), findSuitablePoint(tempLine, polygon)));
-                    dashedLiner.rasterize(new Line(polygon.getLast(), findSuitablePoint(tempLine, polygon)));
+                    dashedLiner.rasterize(new Line(polygon.getFirst(), polygon.findNearestPointToAxisCandidates(tempLine)));
+                    dashedLiner.rasterize(new Line(polygon.getLast(), polygon.findNearestPointToAxisCandidates(tempLine)));
                 } else {
                     dashedLiner.rasterize(new Line(polygon.getFirst(), newPoint));
                     dashedLiner.rasterize(new Line(polygon.getLast(), newPoint));
@@ -201,28 +200,6 @@ public class Controller2D implements Controller {
         });
     }
 
-    private Point2D findSuitablePoint(Line line, Polygon polygon) {
-        Point2D start = line.getStart();
-        Point2D cursor = line.getEnd();
-
-        // proměnné pro přehlednější počítání s Point2D diagonal
-        double dx = cursor.getX() - start.getX();
-        double dy = cursor.getY() - start.getY();
-        double min = Math.min(Math.abs(dx), Math.abs(dy));
-
-        // možné cílové body: vodorovný, svislý, diagonální (45°)
-        Point2D horizontal = new Point2D(cursor.getX(), start.getY());
-        Point2D vertical = new Point2D(start.getX(), cursor.getY());
-        Point2D diagonal = new Point2D(start.getX() + Math.signum(dx) * min, start.getY() + Math.signum(dy) * min);
-
-        // nalezení nejbližšího z těchto bodů k pozici kurzoru
-        Point2D[] candidates = { horizontal, vertical, diagonal };
-        int nearestIndex = polygon.findNearestPoint(cursor, candidates);
-        Point2D nearest = candidates[nearestIndex];
-
-        return nearest;
-    }
-
     private void toggleWuAlgorithm() {
         Color currentColor = polygonColor;
         if (useWu) {
@@ -234,7 +211,7 @@ public class Controller2D implements Controller {
         useWu = !useWu;
 
         //  překreslí polygon a všechny čáry
-        polygonRasterizer = new PolygonRasterizer(liner);
+        polygonRasterizer.setLiner(liner);
         drawScene();
     }
 
