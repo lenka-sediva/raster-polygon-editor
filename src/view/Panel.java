@@ -8,7 +8,7 @@ import java.awt.*;
 
 public class Panel extends JPanel {
 
-    private final Raster raster;
+    private Raster raster;
 
     public Panel(int width, int height) {
         setPreferredSize(new Dimension(width, height));
@@ -27,5 +27,9 @@ public class Panel extends JPanel {
 
     public void clear() {
         raster.clear();
+    }
+
+    public void setRaster(Raster newRaster) {
+        this.raster = newRaster;
     }
 }

@@ -7,7 +7,9 @@ public class App {
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             Window window = new Window(800, 600);
-            new Controller2D(window.getPanel());
+            Controller2D controller = new Controller2D(window.getPanel());
+            controller.updateRaster(window.getPanel().getRaster());
+            controller.drawScene();
             // new Controller3D(window.getPanel());
             window.setVisible(true); // zobrazit okno
         });

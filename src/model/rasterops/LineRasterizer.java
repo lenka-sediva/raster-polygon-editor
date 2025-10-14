@@ -39,4 +39,8 @@ public abstract class LineRasterizer {
     public void setGradient(Color start, Color end) {
         this.gradient = new Gradient(start, end);
     }
+
+    public void setRaster(Raster raster) {
+        this.raster = raster;
+    }
 }

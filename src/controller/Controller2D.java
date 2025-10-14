@@ -3,6 +3,7 @@ package controller;
 import model.objectdata.Line;
 import model.objectdata.Point2D;
 import model.objectdata.Polygon;
+import model.rasterdata.Raster;
 import model.rasterdata.RasterBI;
 import model.rasterops.*;
 import view.Panel;
@@ -56,6 +57,17 @@ public class Controller2D implements Controller {
 
     @Override
     public void initListeners(Panel panel) {
+        panel.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                RasterBI newRaster = new RasterBI(panel.getWidth(), panel.getHeight());
+                newRaster.clear();
+                panel.setRaster(newRaster);
+                updateRaster(newRaster);
+                drawScene();
+            }
+        });
+
         panel.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
@@ -113,7 +125,7 @@ public class Controller2D implements Controller {
                     Point2D dragged = polygon.getItem(draggedPointIndex);
                     dragged.setX(e.getX());
                     dragged.setY(e.getY());
-                    return; // když se dragguje vrchol, nechceme pružnou čáru
+                    return;
                 }
 
                 // vykreslení pružné dashed čáry
@@ -210,9 +222,8 @@ public class Controller2D implements Controller {
         liner.setColor(currentColor);
         useWu = !useWu;
 
-        //  překreslí polygon a všechny čáry
         polygonRasterizer.setLiner(liner);
-        drawScene();
+        drawScene(); //  překreslí polygon
     }
 
     private void toggleBackground(){
@@ -224,7 +235,13 @@ public class Controller2D implements Controller {
         drawScene();
     }
 
-    private void drawScene() {
+    public void updateRaster(Raster newRaster){
+        liner.setRaster(newRaster);
+        dashedLiner.setRaster(newRaster);
+        polygonRasterizer.setLiner(liner);
+    }
+
+    public void drawScene() {
         panel.getRaster().clear();
         polygonRasterizer.rasterize(polygon);
         panel.repaint();
