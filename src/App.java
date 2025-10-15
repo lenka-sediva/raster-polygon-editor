@@ -6,7 +6,7 @@ import javax.swing.*;
 public class App {
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            Window window = new Window(800, 600);
+            Window window = new Window(1000, 800);
             Controller2D controller = new Controller2D(window.getPanel());
             controller.updateRaster(window.getPanel().getRaster());
             controller.drawScene();

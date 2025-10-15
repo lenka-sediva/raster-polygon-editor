@@ -32,25 +32,31 @@ public class Window extends JFrame {
         controlPanel.setLayout(new BorderLayout());
         controlPanel.setBackground(Color.LIGHT_GRAY);
 
+        Font bigFont = new Font("SansSerif", Font.BOLD, 16);
+        UIManager.put("Label.font", bigFont); // nastaví výchozí font pro všechny JLabel
+
         JLabel helpLabel = new JLabel("Nápověda");
-        helpLabel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        helpLabel.setForeground(Color.WHITE); // bílý text
+        helpLabel.setBackground(new Color(30, 144, 255)); // modré pozadí (DogerBlue)
+        helpLabel.setOpaque(true);
+        helpLabel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         controlPanel.add(helpLabel, BorderLayout.NORTH);
 
         // panel pro 2 sloupce pod nápovědou
         JPanel columnsPanel = new JPanel();
         columnsPanel.setLayout(new GridLayout(1, 2));
-        columnsPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        columnsPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         JPanel leftPanel = new JPanel();
         leftPanel.setLayout(new BoxLayout(leftPanel, BoxLayout.Y_AXIS));
-        leftPanel.add(new JLabel("Nový vrchol: levé tlačítko"));
+        leftPanel.add(new JLabel("Přidání nového vrcholu: levé tlačítko myši"));
         leftPanel.add(new JLabel("Změna barvy pozadí: [B]"));
         leftPanel.add(new JLabel("Přidání vrcholu na nejbližší hranu: [N]"));
         leftPanel.add(new JLabel("Vymazání plátna: [C]"));
 
         JPanel rightPanel = new JPanel();
         rightPanel.setLayout(new BoxLayout(rightPanel, BoxLayout.Y_AXIS));
-        rightPanel.add(new JLabel("Posunutí vrcholu: pravé tlačítko"));
+        rightPanel.add(new JLabel("Posunutí vrcholu: pravé tlačítko myši"));
         rightPanel.add(new JLabel("Zobrazování úseček: [SHIFT]"));
         rightPanel.add(new JLabel("Smazání nejbližšího vrcholu: [R]"));
         rightPanel.add(new JLabel("Anti-aliasing: [A]"));
