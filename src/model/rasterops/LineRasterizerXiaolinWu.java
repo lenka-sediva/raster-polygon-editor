@@ -36,6 +36,11 @@ public class LineRasterizerXiaolinWu extends LineRasterizer{
 
     @Override
     protected void drawLine(int x1, int y1, int x2, int y2) {
+        if (x1 == x2 && y1 == y2) { // degenerovaná úsečka
+            raster.setPixel(x1, y1, 255);
+            return;
+        }
+
         boolean steep = Math.abs(y2 - y1) > Math.abs(x2 - x1);
 
         // otočení souřadnic, pokud je čára strmá

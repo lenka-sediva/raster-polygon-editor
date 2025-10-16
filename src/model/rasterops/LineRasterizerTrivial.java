@@ -31,6 +31,11 @@ public class LineRasterizerTrivial extends LineRasterizer {
 
     @Override
     protected void drawLine(int x1, int y1, int x2, int y2) {
+        if (x1 == x2 && y1 == y2) { // degenerovaná úsečka
+            raster.setPixel(x1, y1, color.getRGB());
+            return;
+        }
+
         float dx = x2 - x1;
         float dy = y2 - y1;
 
@@ -54,7 +59,7 @@ public class LineRasterizerTrivial extends LineRasterizer {
             float k = dy / dx;
             float q = y1 - k * x1;
 
-            for (int x = x1; x < x2; x++) {
+            for (int x = x1; x <= x2; x++) {
                 int y = Math.round(k * x + q); // zaokrouhlení na nejbližší pixel
                 raster.setPixel(x, y, color.getRGB());
             }
@@ -77,7 +82,7 @@ public class LineRasterizerTrivial extends LineRasterizer {
             float k = dx / dy;
             float q = x1 - k * y1;
 
-            for (int y = y1; y < y2; y++) {
+            for (int y = y1; y <= y2; y++) {
                 int x = Math.round(k * y + q);
                 raster.setPixel(x, y, color.getRGB());
             }
