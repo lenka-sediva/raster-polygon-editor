@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 public class Polygon {
 
-    private ArrayList<Point2D> polygon;
+    private final ArrayList<Point2D> polygon;
 
     public Polygon() {
         this.polygon = new ArrayList<>();
@@ -115,8 +115,7 @@ public class Polygon {
         // nalezení nejbližšího z těchto bodů k pozici kurzoru
         Point2D[] candidates = { horizontal, vertical, diagonal };
         int nearestIndex = findNearestPoint(cursor, candidates);
-        Point2D nearest = candidates[nearestIndex];
 
-        return nearest;
+        return candidates[nearestIndex];
     }
 }

@@ -11,13 +11,18 @@ import java.awt.*;
 
 public class DashedLineRasterizer extends LineRasterizer {
 
-    private int dashLength = 5; // počet pixelů pro čárku
-    private int gapLength = 3; // počet pixelů pro mezeru
+    private int dashLength = 8; // počet pixelů pro čárku
+    private int gapLength = 4; // počet pixelů pro mezeru
 
     public DashedLineRasterizer(Raster raster) {
         super(raster);
     }
 
+    /**
+     * Umožňuje flexibilně měnit vzhled čárkované čáry pro případné budoucí využití
+     * @param dashLength počet pixelů vykreslených jako čárka
+     * @param gapLength počet pixelů, které tvoří mezeru mezi čárkami
+     */
     public void setDashPattern(int dashLength, int gapLength) {
         this.dashLength = dashLength;
         this.gapLength = gapLength;

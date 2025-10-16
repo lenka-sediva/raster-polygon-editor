@@ -18,12 +18,12 @@ public class Controller2D implements Controller {
 
     private final Panel panel;
     private LineRasterizer liner;
-    private PolygonRasterizer polygonRasterizer;
+    private final PolygonRasterizer polygonRasterizer;
     private boolean isRasterizingWithShift = false;
     private boolean useWu = true;
 
-    private Polygon polygon = new Polygon();
-    private List<Line> lines;
+    private final Polygon polygon = new Polygon();
+    private final List<Line> lines;
     private Color polygonColor = Color.BLUE;
     private final DashedLineRasterizer dashedLiner;
 
