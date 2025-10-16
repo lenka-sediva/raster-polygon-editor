@@ -25,7 +25,6 @@ public class Controller2D implements Controller {
     private Polygon polygon = new Polygon();
     private List<Line> lines;
     private Color polygonColor = Color.BLUE;
-    private Color previewColor = Color.RED;
     private final DashedLineRasterizer dashedLiner;
 
     // úprava tažením
@@ -42,8 +41,6 @@ public class Controller2D implements Controller {
         this.lines = new ArrayList<>();
 
         this.dashedLiner = new DashedLineRasterizer(panel.getRaster());
-        dashedLiner.setColor(previewColor);
-        dashedLiner.setDashPattern(6, 4);
         dashedLiner.setGradient(Color.BLUE, Color.RED); // použití gradientu
 
         initObjects();
@@ -132,6 +129,8 @@ public class Controller2D implements Controller {
                 Point2D newPoint = new Point2D(e.getX(), e.getY());
                 Line tempLine = new Line(polygon.getLast(), newPoint);
 
+                dashedLiner.setGradient(polygonColor, Color.RED); // gradient vždy od vybrané barvy do červené
+
                 if (isRasterizingWithShift) {
                     dashedLiner.rasterize(new Line(polygon.getFirst(), polygon.findNearestPointToAxisCandidates(tempLine)));
                     dashedLiner.rasterize(new Line(polygon.getLast(), polygon.findNearestPointToAxisCandidates(tempLine)));
@@ -200,6 +199,12 @@ public class Controller2D implements Controller {
                     // změna pozadí
                     case KeyEvent.VK_B:
                         toggleBackground();
+                        break;
+
+                    // výběr barvy vykreslování
+                    case KeyEvent.VK_F:
+                        chooseLineColor();
+                        break;
                 }
             }
 
@@ -213,13 +218,12 @@ public class Controller2D implements Controller {
     }
 
     private void toggleWuAlgorithm() {
-        Color currentColor = polygonColor;
         if (useWu) {
             liner = new LineRasterizerXiaolinWu(panel.getRaster());
         } else {
             liner = new FilledLineRasterizer(panel.getRaster());
         }
-        liner.setColor(currentColor);
+        liner.setColor(polygonColor);
         useWu = !useWu;
 
         polygonRasterizer.setLiner(liner);
@@ -241,7 +245,18 @@ public class Controller2D implements Controller {
         polygonRasterizer.setLiner(liner);
     }
 
+    private void chooseLineColor() {
+        // otevře dialog pro výběr barvy
+        Color selectedColor = JColorChooser.showDialog(panel, "Vyber barvu úsečky", polygonColor);
+        if (selectedColor != null) {
+            polygonColor = selectedColor;
+            liner.setColor(polygonColor);
+            drawScene();
+        }
+    }
+
     public void drawScene() {
+        liner.setColor(polygonColor);
         panel.getRaster().clear();
         polygonRasterizer.rasterize(polygon);
         panel.repaint();

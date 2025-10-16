@@ -24,20 +24,10 @@ public class LineRasterizerXiaolinWu extends LineRasterizer{
         super(raster);
     }
 
-    // fractional part
-    private double fpart (double x) {
-        return x - Math.floor(x);
-    }
-
-    // remaining fractional part
-    private double rfpart (double x) {
-        return 1 - fpart(x);
-    }
-
     @Override
     protected void drawLine(int x1, int y1, int x2, int y2) {
         if (x1 == x2 && y1 == y2) { // degenerovaná úsečka
-            raster.setPixel(x1, y1, 255);
+            raster.setPixel(x1, y1, 255); // 255 = maximální jas
             return;
         }
 
@@ -76,17 +66,13 @@ public class LineRasterizerXiaolinWu extends LineRasterizer{
         int xPixel1 = (int) xEnd;
         int yPixel1 = (int) Math.floor(yEnd);
 
-        // 255 = maximální jas
-        int c1 = (int) (rfpart(yEnd) * xGap * 255); // jas horního pixelu
-        int c2 = (int) (fpart(yEnd) * xGap * 255); // jas dolního pixelu
-
-        // vykreslení startovních pixelů
+        // vykreslení startovních pixelů - horní a dolní s jasem podle vzdálenosti od ideální čáry
         if (steep) {
-            raster.setPixel(yPixel1, xPixel1, c1);
-            raster.setPixel(yPixel1 + 1, xPixel1, c2);
+            plot(yPixel1, xPixel1, rfpart(yEnd) * xGap);
+            plot(yPixel1 + 1, xPixel1, fpart(yEnd) * xGap);
         } else {
-            raster.setPixel(xPixel1, yPixel1, c1);
-            raster.setPixel(xPixel1, yPixel1 + 1, c2);
+            plot(xPixel1, yPixel1, rfpart(yEnd) * xGap);
+            plot(xPixel1, yPixel1 + 1, fpart(yEnd) * xGap);
         }
 
         // průsečík
@@ -99,30 +85,52 @@ public class LineRasterizerXiaolinWu extends LineRasterizer{
         int yPixel2 = (int) Math.floor(yEnd2);
         double xGap2 = fpart(x2 + 0.5);
 
-        int c3 = (int) (rfpart(yEnd2) * xGap2 * 255);
-        int c4 = (int) (fpart(yEnd2) * xGap2 * 255);
-
+        // vykreslení koncových pixelů
         if (steep) {
-            raster.setPixel(yPixel2, xPixel2, c3);
-            raster.setPixel(yPixel2 + 1, xPixel2, c4);
+            plot(yPixel2, xPixel2, rfpart(yEnd2) * xGap2);
+            plot(yPixel2 + 1, xPixel2, fpart(yEnd2) * xGap2);
         } else {
-            raster.setPixel(xPixel2, yPixel2, c3);
-            raster.setPixel(xPixel2, yPixel2 + 1, c4);
+            plot(xPixel2, yPixel2, rfpart(yEnd2) * xGap2);
+            plot(xPixel2, yPixel2 + 1, fpart(yEnd2) * xGap2);
         }
 
         // hlavní smyčka - přidá pixel nad i pod úsečku
         for (double x = xPixel1 + 1; x < xPixel2; x++) {
-            int c5 = (int) (rfpart(intery) * 255);
-            int c6 = (int) (fpart(intery) * 255);
-
             if (steep) {
-                raster.setPixel((int) Math.floor(intery), (int) x, c5);
-                raster.setPixel((int) Math.floor(intery) + 1, (int) x, c6);
+                plot((int) Math.floor(intery), (int) x, rfpart(intery));
+                plot((int) Math.floor(intery) + 1, (int) x, fpart(intery));
             } else {
-                raster.setPixel((int) x, (int) Math.floor(intery), c5);
-                raster.setPixel((int) x, (int) Math.floor(intery) + 1, c6);
+                plot((int) x, (int) Math.floor(intery), rfpart(intery));
+                plot((int) x, (int) Math.floor(intery) + 1, fpart(intery));
             }
             intery = intery + gradient; // posun na další sloupec/řádek
         }
+    }
+
+    // fractional part = vrátí zlomkovou část čísla
+    private double fpart (double x) {
+        return x - Math.floor(x);
+    }
+
+    // remaining fractional part = vrátí zbytek zlomkové části
+    private double rfpart (double x) {
+        return 1 - fpart(x);
+    }
+
+    /**
+     * Vykreslí jeden pixel s jasem
+     * @param x souřadnice pixelu
+     * @param y souřadnice pixelu
+     * @param brightness hodnota jasu 0..1 (1 = plná barva)
+     */
+    private void plot(int x, int y, double brightness) {
+        if (x < 0 || y < 0 || x >= raster.getWidth() || y >= raster.getHeight()) return;
+
+        int r = (int) (color.getRed() * brightness);
+        int g = (int) (color.getGreen() * brightness);
+        int b = (int) (color.getBlue() * brightness);
+
+        int rgb = (r << 16) | (g << 8) | b; // složí komponenty zpět do jedné hodnoty typu int
+        raster.setPixel(x, y, rgb);
     }
 }

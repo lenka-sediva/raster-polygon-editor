@@ -53,6 +53,7 @@ public class Window extends JFrame {
         leftPanel.add(new JLabel("Změna barvy pozadí: [B]"));
         leftPanel.add(new JLabel("Přidání vrcholu na nejbližší hranu: [N]"));
         leftPanel.add(new JLabel("Vymazání plátna: [C]"));
+        leftPanel.add(new JLabel("Změna barvy: [F]"));
 
         JPanel rightPanel = new JPanel();
         rightPanel.setLayout(new BoxLayout(rightPanel, BoxLayout.Y_AXIS));
