@@ -23,12 +23,11 @@ public class Controller2D implements Controller {
     private boolean useWu = true;
 
     private final Polygon polygon = new Polygon();
-    private final List<Line> lines;
+    private final List<Line> lines; // ukládání úseček pro možné budoucí využití
     private Color polygonColor = Color.BLUE;
     private final DashedLineRasterizer dashedLiner;
 
-    // úprava tažením
-    private int draggedPointIndex = -1; // žádný bod není vybraný
+    private int draggedPointIndex = -1; // žádný bod není vybraný pro tažení
     private boolean isDragging = false;
 
     public Controller2D(Panel panel) {
@@ -41,7 +40,7 @@ public class Controller2D implements Controller {
         this.lines = new ArrayList<>();
 
         this.dashedLiner = new DashedLineRasterizer(panel.getRaster());
-        dashedLiner.setGradient(Color.BLUE, Color.RED); // použití gradientu
+        dashedLiner.setGradient(Color.BLUE, Color.RED); // výchozí gradient
 
         initObjects();
         initListeners(panel);
@@ -49,7 +48,7 @@ public class Controller2D implements Controller {
 
     @Override
     public void initObjects() {
-        // netřeba inicializovat žádné objekty na začátku
+        // netřeba inicializovat žádné objekty na začátku, možné budoucí využití
     }
 
     @Override
@@ -70,13 +69,13 @@ public class Controller2D implements Controller {
             public void mousePressed(MouseEvent e) {
                 Point2D newPoint = new Point2D(e.getX(), e.getY());
 
-                // levé tlačítko - přidání prvního bodu polygonu
+                // levé tlačítko - přidání prvního bodu polygonu (nutné, jinak nejde drag prvního bodu)
                 if (polygon.size() == 0) {
                     polygon.addItem(newPoint);
                     drawScene();
                 }
 
-                // pravé tlačítko - najde nejbližší bod pro tažení
+                // pravé tlačítko - najde nejbližší bod pro tažení (změna vrcholu)
                 if (e.getButton() == MouseEvent.BUTTON3) {
                     Point2D[] points = new Point2D[polygon.size()];
                     for (int i = 0; i < polygon.size(); i++) {
@@ -90,13 +89,14 @@ public class Controller2D implements Controller {
 
             @Override
             public void mouseReleased(MouseEvent e) {
-                if (isDragging) {
+                if (isDragging) { // konec dragování
                     isDragging = false;
                     draggedPointIndex = -1;
                     drawScene();
                     return;
                 }
 
+                // přidání nového vrcholu polygonu
                 Point2D newPoint = new Point2D(e.getX(), e.getY());
                 Line tempLine = new Line(polygon.getLast(), newPoint);
 
@@ -160,10 +160,7 @@ public class Controller2D implements Controller {
 
                     // přidání nového vrcholu do nejbližší hrany
                     case KeyEvent.VK_N:
-                        Point mousePosition = MouseInfo.getPointerInfo().getLocation();
-                        SwingUtilities.convertPointFromScreen(mousePosition, panel);
-                        Point2D cursor = new Point2D(mousePosition.getX(), mousePosition.getY());
-
+                        Point2D cursor = getCursorPosition();
                         int insertIndex = Polygon.findNearestLine(cursor, polygon);
                         if (insertIndex != -1) {
                             polygon.addItemToIndex(insertIndex + 1, cursor);
@@ -173,17 +170,13 @@ public class Controller2D implements Controller {
 
                     // smaže nejbližší vrchol
                     case KeyEvent.VK_R:
-                        Point mousePosition2 = MouseInfo.getPointerInfo().getLocation();
-                        SwingUtilities.convertPointFromScreen(mousePosition2, panel);
-                        Point2D cursor2 = new Point2D(mousePosition2.getX(), mousePosition2.getY());
-
                         Point2D[] points = new Point2D[polygon.size()];
 
                         for (int i = 0; i < polygon.size(); i++) {
                             points[i] = polygon.getItem(i);
                         }
 
-                        int nearestIndex = polygon.findNearestPoint(cursor2, points);
+                        int nearestIndex = polygon.findNearestPoint(getCursorPosition(), points);
 
                         if (nearestIndex != -1) {
                             polygon.removeItem(nearestIndex);
@@ -253,6 +246,12 @@ public class Controller2D implements Controller {
             liner.setColor(polygonColor);
             drawScene();
         }
+    }
+
+    private Point2D getCursorPosition() {
+        Point mousePosition = MouseInfo.getPointerInfo().getLocation();
+        SwingUtilities.convertPointFromScreen(mousePosition, panel);
+        return new Point2D(mousePosition.getX(), mousePosition.getY());
     }
 
     public void drawScene() {
