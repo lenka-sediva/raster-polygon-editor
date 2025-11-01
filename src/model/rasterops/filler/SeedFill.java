@@ -9,16 +9,11 @@ import java.util.Stack;
 
 import static model.rasterdata.RasterBI.getBackgroundColor;
 
-public class SeedFill implements Filler {
+public class SeedFill {
     private final Raster raster;
 
     public SeedFill(Raster raster) {
         this.raster = raster;
-    }
-
-    @Override
-    public void fill(int x, int y, int newCol) {
-        seedFill4Stack(x, y, newCol);
     }
 
     /**
