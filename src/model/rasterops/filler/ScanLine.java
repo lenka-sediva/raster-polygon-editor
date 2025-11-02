@@ -7,7 +7,6 @@ import model.rasterdata.Raster;
 
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class ScanLine {
@@ -60,7 +59,7 @@ public class ScanLine {
                 }
             }
 
-            Collections.sort(intersections); // seřazení průsečíků zleva doprava
+            sortIntersections(intersections); // seřazení průsečíků zleva doprava
 
             // vyplnění mezi průsečíky - vždy mezi lichým a sudým
             for (int i = 0; i + 1 < intersections.size(); i += 2) {
@@ -76,5 +75,27 @@ public class ScanLine {
         }
         // obtáhnutí hranice polygonu
         polygonRasterizer.rasterize(polygon);
+    }
+
+    /**
+     * Implementace algoritmu pro řazení průsečíků pomocí insertion sort
+     * Řadí hodnoty v seznamu zleva doprava (vzestupně)
+     * @param list seznam x-ových souřadnic průsečíků, který se upraví na seřazený
+     */
+    private void sortIntersections(List<Integer> list) {
+        // projde všechny prvky od druhého k poslednímu
+        for (int i = 1; i < list.size(); i++) {
+            int key = list.get(i); // aktuální hodnota k vložení
+            int j = i - 1;
+
+            // posouvá všechny prvky větší než key o 1 místo doprava
+            while (j >= 0 && list.get(j) > key) {
+                list.set(j + 1, list.get(j));
+                j--;
+            }
+
+            // vloží key na správnou pozici
+            list.set(j + 1, key);
+        }
     }
 }
