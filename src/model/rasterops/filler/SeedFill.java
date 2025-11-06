@@ -7,8 +7,6 @@ import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Stack;
 
-import static model.rasterdata.RasterBI.getBackgroundColor;
-
 public class SeedFill {
     private final Raster raster;
 
@@ -27,7 +25,7 @@ public class SeedFill {
         int backgroundColor = raster.getPixel(x, y);
 
         // pokud je počáteční bod už vyplněný novou barvou nebo není pozadí, konec
-        if (backgroundColor == fillCol || backgroundColor != getBackgroundColor().getRGB()) {
+        if (backgroundColor == fillCol) {
             return;
         }
 
@@ -65,7 +63,7 @@ public class SeedFill {
     public void seedFill4Queue(int x, int y, int fillCol) {
         int backgroundColor = raster.getPixel(x,y);
 
-        if (backgroundColor == fillCol || backgroundColor != getBackgroundColor().getRGB()) {
+        if (backgroundColor == fillCol) {
             return;
         }
 
@@ -77,7 +75,6 @@ public class SeedFill {
             x = p.getX();
             y = p.getY();
 
-            // kontrola hranic
             if (x < 0 || y < 0 || x >= raster.getWidth() || y >= raster.getHeight()) {
                 continue;
             }
@@ -91,6 +88,83 @@ public class SeedFill {
                 queue.offer(new Point2D(x - 1, y));
                 queue.offer(new Point2D(x, y + 1));
                 queue.offer(new Point2D(x, y - 1));
+            }
+        }
+    }
+
+    /**
+     * Metoda záplavového algoritmu pro 8-spojitou oblast pomocí zásobníku
+     * @param x x-ová souřadnice semínka
+     * @param y y-ová souřadnice semínka
+     * @param fillCol nová barva, jakou má být útvar vyplněný
+     */
+    public void seedFill8Stack(int x, int y, int fillCol) {
+        int backgroundColor = raster.getPixel(x, y);
+
+        if (backgroundColor == fillCol) return;
+
+        Stack<Point2D> stack = new Stack<>();
+        stack.push(new Point2D(x, y));
+
+        while (!stack.isEmpty()) {
+            Point2D p = stack.pop();
+            x = p.getX();
+            y = p.getY();
+
+            if (x < 0 || y < 0 || x >= raster.getWidth() || y >= raster.getHeight())
+                continue;
+
+            if (raster.getPixel(x, y) == backgroundColor) {
+                raster.setPixel(x, y, fillCol);
+
+                // přidání 8 sousedů (včetně diagonálních)
+                stack.push(new Point2D(x + 1, y));
+                stack.push(new Point2D(x - 1, y));
+                stack.push(new Point2D(x, y + 1));
+                stack.push(new Point2D(x, y - 1));
+
+                stack.push(new Point2D(x + 1, y + 1));
+                stack.push(new Point2D(x - 1, y - 1));
+                stack.push(new Point2D(x + 1, y - 1));
+                stack.push(new Point2D(x - 1, y + 1));
+            }
+        }
+    }
+
+    /**
+     * Metoda záplavového algoritmu pro 8-spojitou oblast pomocí fronty
+     * @param x x-ová souřadnice semínka
+     * @param y y-ová souřadnice semínka
+     * @param fillCol nová barva, jakou má být útvar vyplněný
+     */
+    public void seedFill8Queue(int x, int y, int fillCol) {
+        int backgroundColor = raster.getPixel(x, y);
+
+        if (backgroundColor == fillCol) return;
+
+        Queue<Point2D> queue = new LinkedList<>();
+        queue.offer(new Point2D(x, y));
+
+        while (!queue.isEmpty()) {
+            Point2D p = queue.poll();
+            x = p.getX();
+            y = p.getY();
+
+            if (x < 0 || y < 0 || x >= raster.getWidth() || y >= raster.getHeight())
+                continue;
+
+            if (raster.getPixel(x, y) == backgroundColor) {
+                raster.setPixel(x, y, fillCol);
+
+                queue.offer(new Point2D(x + 1, y));
+                queue.offer(new Point2D(x - 1, y));
+                queue.offer(new Point2D(x, y + 1));
+                queue.offer(new Point2D(x, y - 1));
+
+                queue.offer(new Point2D(x + 1, y + 1));
+                queue.offer(new Point2D(x - 1, y - 1));
+                queue.offer(new Point2D(x + 1, y - 1));
+                queue.offer(new Point2D(x - 1, y + 1));
             }
         }
     }
