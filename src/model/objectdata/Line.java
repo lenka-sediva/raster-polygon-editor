@@ -116,4 +116,24 @@ public class Line {
         }
         return (intersections % 2) != 0; // lichý počet průsečíků = uvnitř
     }
+
+    public boolean isInside(Point2D p){
+        // tečný vektor
+        double tx = end.getX() - start.getX();
+        double ty = end.getY() - start.getY();
+
+        // normálový vektor
+        double nx = -ty;
+        double ny = tx;
+
+        // směrový vektor k bodu p
+        double sx = p.getX() - start.getX();
+        double sy = p.getY() - start.getY();
+
+        // skalární součin normálového a směrového vektoru
+        double dot = nx * sx + ny * sy;
+
+        // true: cos alpha musí být > 0
+        return dot >= 0;
+    }
 }
