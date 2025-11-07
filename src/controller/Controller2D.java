@@ -5,7 +5,7 @@ import model.objectdata.Point2D;
 import model.objectdata.Polygon;
 import model.rasterdata.Raster;
 import model.rasterdata.RasterBI;
-import model.rasterops.*;
+import model.rasterops.rasterizer.*;
 import view.Panel;
 
 import javax.swing.*;
@@ -261,3 +261,4 @@ public class Controller2D implements Controller {
         panel.repaint();
     }
 }
+

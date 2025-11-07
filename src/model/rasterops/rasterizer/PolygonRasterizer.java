@@ -1,4 +1,4 @@
-package model.rasterops;
+package model.rasterops.rasterizer;
 
 import model.objectdata.Line;
 import model.objectdata.Point2D;

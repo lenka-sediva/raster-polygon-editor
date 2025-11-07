@@ -1,4 +1,4 @@
-package model.rasterops;
+package model.rasterops.rasterizer;
 
 import model.rasterdata.Raster;
 import model.rasterdata.RasterBI;
