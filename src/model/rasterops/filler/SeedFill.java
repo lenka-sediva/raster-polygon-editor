@@ -15,17 +15,18 @@ public class SeedFill {
     }
 
     /**
-     * Metoda záplavového algoritmu pro 4-spojitou i 8-spojitou oblast pomocí fronty
+     * Metoda záplavového algoritmu pro 4-spojitou i 8-spojitou oblast pomocí zásobníku
      * @param x x-ová souřadnice semínka
      * @param y y-ová souřadnice semínka
      * @param fillCol nová barva, jakou má být útvar vyplněný
+     * @param pattern vzor výplně (pokud je null, použije se fillCol)
      * @param seedFill8 true, pokud chceme vyplňovat 8 spojitě
      */
-    public void seedFillStack(int x, int y, int fillCol, boolean seedFill8) {
-        // získej barvu pozadí z počátečního bodu
+    public void seedFillStack(int x, int y, int fillCol, PatternFill pattern, boolean seedFill8) {
+        // získá barvu pozadí v místě kliknutí (semínka)
         int backgroundColor = raster.getPixel(x, y);
 
-        // pokud je počáteční bod už vyplněný novou barvou nebo není pozadí, konec
+        // konec při vyplnění
         if (backgroundColor == fillCol) {
             return;
         }
@@ -38,13 +39,17 @@ public class SeedFill {
             x = p.getX();
             y = p.getY();
 
-            // Kontrola hranic
-            if (x < 0 || y < 0 || x >= raster.getWidth() || y >= raster.getHeight())
+            // kontrola hranic
+            if (x < 0 || y < 0 || x >= raster.getWidth() || y >= raster.getHeight()) {
                 continue;
+            }
+
+            // barva vyplnění
+            int targetColor = (pattern == null) ? fillCol : pattern.getColor(x,y).getRGB();
 
             // kontrola barvy pozadí
             if (raster.getPixel(x, y) == backgroundColor) {
-                raster.setPixel(x, y, fillCol);
+                raster.setPixel(x, y, targetColor);
 
                 // přidání 4 sousedů
                 stack.push(new Point2D(x + 1, y));
@@ -52,6 +57,7 @@ public class SeedFill {
                 stack.push(new Point2D(x, y + 1));
                 stack.push(new Point2D(x, y - 1));
 
+                // přidání diagonálních sousedů pro 8-spojitou oblast
                 if(seedFill8) {
                     stack.push(new Point2D(x + 1, y + 1));
                     stack.push(new Point2D(x - 1, y - 1));
@@ -77,7 +83,7 @@ public class SeedFill {
         }
 
         Queue<Point2D> queue = new LinkedList<>();
-        queue.add(new Point2D(x, y)); // startovní pixel = semínko
+        queue.add(new Point2D(x, y));
 
         while(!queue.isEmpty()) {
             Point2D p = queue.poll();
