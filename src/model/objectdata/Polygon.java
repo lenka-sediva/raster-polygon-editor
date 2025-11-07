@@ -118,4 +118,13 @@ public class Polygon {
 
         return candidates[nearestIndex];
     }
+
+    // převede polygon na pole bodů
+    public Point2D[] toArray() {
+        Point2D[] arr = new Point2D[polygon.size()];
+        for (int i = 0; i < polygon.size(); i++) {
+            arr[i] = polygon.get(i);
+        }
+        return arr;
+    }
 }
