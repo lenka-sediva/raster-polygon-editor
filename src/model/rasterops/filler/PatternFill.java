@@ -25,8 +25,8 @@ public interface PatternFill {
         return (x, y) -> (x / width) % 2 == 0 ? color1 : color2;
     }
 
-    // šikmé pruhy (45 stupňů)
-    static PatternFill diagonalStripes(int size, Color color1, Color color2) {
-        return (x, y) -> ((x + y) / size) % 2 == 0 ? color1 : color2;
+    // tečkovaný vzor
+    static PatternFill dots(int spacing, Color color1, Color color2) {
+        return (x, y) -> (x % spacing == 0 && y % spacing == 0) ? color1 : color2;
     }
 }
