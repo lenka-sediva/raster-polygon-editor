@@ -7,11 +7,30 @@ import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Stack;
 
-public class SeedFill {
+public class SeedFill implements Filler {
     private final Raster raster;
+    private int startX;
+    private int startY;
+    private int fillCol;
+    private PatternFill pattern;
+    private boolean fill8;
 
     public SeedFill(Raster raster) {
         this.raster = raster;
+    }
+
+    // nastavení parametrů pro fill
+    public void setSeed(int x, int y, int fillCol, PatternFill pattern, boolean fill8) {
+        this.startX = x;
+        this.startY = y;
+        this.fillCol = fillCol;
+        this.pattern = pattern;
+        this.fill8 = fill8;
+    }
+
+    @Override
+    public void fill() {
+        seedFillStack(startX, startY, fillCol, pattern, fill8);
     }
 
     /**
@@ -20,9 +39,9 @@ public class SeedFill {
      * @param y y-ová souřadnice semínka
      * @param fillCol nová barva, jakou má být útvar vyplněný
      * @param pattern vzor výplně (pokud je null, použije se fillCol)
-     * @param seedFill8 true, pokud chceme vyplňovat 8 spojitě
+     * @param fill8 true, pokud chceme vyplňovat 8 spojitě
      */
-    public void seedFillStack(int x, int y, int fillCol, PatternFill pattern, boolean seedFill8) {
+    public void seedFillStack(int x, int y, int fillCol, PatternFill pattern, boolean fill8) {
         // získá barvu pozadí v místě kliknutí (semínka)
         int backgroundColor = raster.getPixel(x, y);
 
@@ -58,7 +77,7 @@ public class SeedFill {
                 stack.push(new Point2D(x, y - 1));
 
                 // přidání diagonálních sousedů pro 8-spojitou oblast
-                if(seedFill8) {
+                if(fill8) {
                     stack.push(new Point2D(x + 1, y + 1));
                     stack.push(new Point2D(x - 1, y - 1));
                     stack.push(new Point2D(x + 1, y - 1));
@@ -73,9 +92,9 @@ public class SeedFill {
      * @param x x-ová souřadnice semínka
      * @param y y-ová souřadnice semínka
      * @param fillCol nová barva, jakou má být útvar vyplněný
-     * @param seedFill8 true, pokud chceme vyplňovat 8 spojitě
+     * @param fill8 true, pokud chceme vyplňovat 8 spojitě
      */
-    public void seedFillQueue(int x, int y, int fillCol, boolean seedFill8) {
+    public void seedFillQueue(int x, int y, int fillCol, PatternFill pattern, boolean fill8) {
         int backgroundColor = raster.getPixel(x,y);
 
         if (backgroundColor == fillCol) {
@@ -94,17 +113,19 @@ public class SeedFill {
                 continue;
             }
 
+            int targetColor = (pattern == null) ? fillCol : pattern.getColor(x,y).getRGB();
+
             int pixelColor = raster.getPixel(x, y);
 
             if (pixelColor == backgroundColor) {
-                raster.setPixel(x, y, fillCol);
+                raster.setPixel(x, y, targetColor);
 
                 queue.offer(new Point2D(x + 1, y));
                 queue.offer(new Point2D(x - 1, y));
                 queue.offer(new Point2D(x, y + 1));
                 queue.offer(new Point2D(x, y - 1));
 
-                if(seedFill8) {
+                if(fill8) {
                     queue.offer(new Point2D(x + 1, y + 1));
                     queue.offer(new Point2D(x - 1, y - 1));
                     queue.offer(new Point2D(x + 1, y - 1));

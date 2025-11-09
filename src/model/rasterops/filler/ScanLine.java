@@ -9,10 +9,11 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ScanLine {
+public class ScanLine implements Filler {
     private final Polygon polygon;
     private final PolygonRasterizer polygonRasterizer;
     private final Raster raster;
+    private PatternFill pattern;
 
     public ScanLine(Raster raster, Polygon polygon, PolygonRasterizer polygonRasterizer) {
         this.polygon = polygon;
@@ -20,9 +21,18 @@ public class ScanLine {
         this.raster = raster;
     }
 
+    // nastavení vzoru pro fill
+    public void setPattern(PatternFill pattern) {
+        this.pattern = pattern;
+    }
+
+    @Override
+    public void fill() {
+        scanLineFill(pattern);
+    }
+
     /**
      * Vyplní polygon pomocí scanline algoritmu podle zadaného vzoru
-     *
      * @param pattern instance PatternFill, určuje barvu každého bodu
      */
     public void scanLineFill(PatternFill pattern) {
