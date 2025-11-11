@@ -45,12 +45,12 @@ public class SutherlandHodgman {
                 if (P_inside) {
                     if (!S_inside) {
                         // P vstupuje do oblasti => přidán průsečík
-                        out.add(intersection(S, P, clipStart, clipEnd));
+                        out.add(Line.intersection(S, P, clipStart, clipEnd));
                     }
                     out.add(P); // přidán bod P, protože je uvnitř
                 } else if (S_inside) {
                     // P je venku, ale S uvnitř => přidán průsečík (výstup z oblasti)
-                    out.add(intersection(S, P, clipStart, clipEnd));
+                    out.add(Line.intersection(S, P, clipStart, clipEnd));
                 }
                 S = P; // posunutí S na aktuální bod P
             }
@@ -64,28 +64,5 @@ public class SutherlandHodgman {
             newPolygon.addItem(p);
         }
         return newPolygon;
-    }
-
-    /**
-     * Vypočítá průsečík dvou úseček (S-P a A-B)
-     * @param S počáteční bod 1. úsečky
-     * @param P koncový bod 1. úsečky
-     * @param A počáteční bod 2. úsečky (hranice ořezávacího polygonu)
-     * @param B koncový bod 2. úsečky
-     * @return bod průsečíku
-     */
-    private Point2D intersection(Point2D S, Point2D P, Point2D A, Point2D B) {
-        double x1 = S.getX(), y1 = S.getY();
-        double x2 = P.getX(), y2 = P.getY();
-        double x3 = A.getX(), y3 = A.getY();
-        double x4 = B.getX(), y4 = B.getY();
-
-        double denom = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
-        if (denom == 0) throw new IllegalArgumentException("Rovnoběžné hrany – nelze spočítat průsečík");
-
-        double px = ((x1*y2 - y1*x2)*(x3 - x4) - (x1 - x2)*(x3*y4 - y3*x4)) / denom;
-        double py = ((x1*y2 - y1*x2)*(y3 - y4) - (y1 - y2)*(x3*y4 - y3*x4)) / denom;
-
-        return new Point2D(px, py);
     }
 }

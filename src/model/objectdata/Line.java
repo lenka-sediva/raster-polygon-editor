@@ -90,6 +90,29 @@ public class Line {
     }
 
     /**
+     * Vypočítá průsečík dvou úseček P a Q
+     * @param p1 počáteční bod 1. úsečky
+     * @param p2 koncový bod 1. úsečky
+     * @param q1 počáteční bod 2. úsečky (hranice ořezávacího polygonu)
+     * @param q2 koncový bod 2. úsečky
+     * @return bod průsečíku
+     */
+    public static Point2D intersection(Point2D p1, Point2D p2, Point2D q1, Point2D q2) {
+        double x1 = p1.getX(), y1 = p1.getY();
+        double x2 = p2.getX(), y2 = p2.getY();
+        double x3 = q1.getX(), y3 = q1.getY();
+        double x4 = q2.getX(), y4 = q2.getY();
+
+        double denom = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
+        if (denom == 0) throw new IllegalArgumentException("Rovnoběžné hrany – nelze spočítat průsečík");
+
+        double px = ((x1*y2 - y1*x2)*(x3 - x4) - (x1 - x2)*(x3*y4 - y3*x4)) / denom;
+        double py = ((x1*y2 - y1*x2)*(y3 - y4) - (y1 - y2)*(x3*y4 - y3*x4)) / denom;
+
+        return new Point2D(px, py);
+    }
+
+    /**
      * Zjistí, zda je bod uvnitř polygonu
      * @param point, který chceme zkontrolovat
      * @param polygon, jehož vnitřek kontrolujeme
