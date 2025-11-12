@@ -9,6 +9,9 @@ import java.awt.*;
 public class Panel extends JPanel {
 
     private Raster raster;
+    private String drawModeText = "";
+    private String drawModeShortcut = "";
+    private String patternText = "";
 
     public Panel(int width, int height) {
         setPreferredSize(new Dimension(width, height));
@@ -19,6 +22,26 @@ public class Panel extends JPanel {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         raster.repaint(g);
+        g.setColor(Color.WHITE);
+        g.setFont(new Font("SansSerif", Font.BOLD, 16));
+        g.drawString(drawModeText, 10, getHeight() - 35);
+        g.drawString(patternText, 10, getHeight() - 10);
+        g.drawString(drawModeShortcut, getWidth() - 125, getHeight() - 10);
+    }
+
+    public void setDrawModeText(String drawModeText) {
+        this.drawModeText = drawModeText;
+        repaint();
+    }
+
+    public void setDrawModeShortcut(String drawModeShortcut) {
+        this.drawModeShortcut = drawModeShortcut;
+        repaint();
+    }
+
+    public void setPatternText(String patternText) {
+        this.patternText = patternText;
+        repaint();
     }
 
     public Raster getRaster() {

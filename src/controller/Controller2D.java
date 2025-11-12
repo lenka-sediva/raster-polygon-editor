@@ -72,8 +72,9 @@ public class Controller2D implements Controller {
         seedFill = new SeedFill(panel.getRaster());
         scanLine = new ScanLine(panel.getRaster(), polygon, polygonRasterizer);
 
-        panel.setDrawModeText("Mode: " + currentMode.name());
-        panel.setPatternText("Pattern: Vertical Stripes"); // výchozí pattern
+        panel.setDrawModeText("Mode: " + currentMode.name() + " [P]");
+        panel.setDrawModeShortcut("[E] pro obdélník");
+        panel.setPatternText("Pattern: Vertical Stripes [V]"); // výchozí pattern
 
         initObjects();
         initListeners(panel);
@@ -164,6 +165,7 @@ public class Controller2D implements Controller {
 
                 // obdélník
                 if (currentMode == DrawMode.RECTANGLE && drawingBase) {
+                    drawScene();
                     end = new Point2D(e.getX(), e.getY());
                     Line base = new Line(start, end);
                     dashedLiner.rasterize(base);
@@ -226,12 +228,14 @@ public class Controller2D implements Controller {
 
                     case KeyEvent.VK_P:
                         currentMode = DrawMode.POLYGON;
-                        panel.setDrawModeText("Mode: " + currentMode.name());
+                        panel.setDrawModeText("Mode: " + currentMode.name() + " [P]");
+                        panel.setDrawModeShortcut("[E] pro obdélník");
                         break;
 
                     case KeyEvent.VK_E:
                         currentMode = DrawMode.RECTANGLE;
-                        panel.setDrawModeText("Mode: " + currentMode.name());
+                        panel.setDrawModeText("Mode: " + currentMode.name() + " [E]");
+                        panel.setDrawModeShortcut("[P] pro polygon");
                         break;
 
                     // přepínání vzorů po ořezu pro scanline
@@ -243,7 +247,7 @@ public class Controller2D implements Controller {
                             case 3 -> "Dots";
                             default -> "Vertical Stripes";
                         };
-                        panel.setPatternText("Pattern: " + patternName);
+                        panel.setPatternText("Pattern: " + patternName + " [V]");
                         drawScene();
                         break;
                 }
@@ -373,8 +377,6 @@ public class Controller2D implements Controller {
 
     private void handleRectanglePressed(Point2D newPoint) {
         // TODO přidat vyplňování SeedFill
-        // TODO přidat, aby šel 1. bod klikat
-
         if (start == null) {
             // 1. klik = začátek základny
             start = newPoint;
@@ -382,10 +384,7 @@ public class Controller2D implements Controller {
             rectangle = new Rectangle();
             rectangle.addItem(start);
             isDraggingRectangle = false;
-            System.out.println("Start je " + start.getY());
-        }
-
-        if (waitingForHeight) {
+        } else if (waitingForHeight) {
             // 3. klik = výška a vytvoření rectangle
             rectangle = new Rectangle(start, end, newPoint);
             rectangles.add(rectangle);
@@ -398,8 +397,8 @@ public class Controller2D implements Controller {
     }
 
     private void handleRectangleReleased(MouseEvent e) {
-        // TODO Problém - volá se hned kvůli drawingBase, takže end je stejný
-        if (drawingBase && rectangle != null) {
+        if (drawingBase) {
+            // zabraňuje vytvoření obdélníka kliknutím, musí být drag
             if(!isDraggingRectangle) {
                 start = null;
                 rectangle = null;
@@ -407,7 +406,7 @@ public class Controller2D implements Controller {
                 return;
             }
 
-            // 2. bod - drag
+            // 2. bod = drag
             end = new Point2D(e.getX(), e.getY());
             rectangle.addItem(end);
             rectangles.add(rectangle);
@@ -418,13 +417,6 @@ public class Controller2D implements Controller {
             waitingForHeight = true;
             isDraggingRectangle = false;
 
-            drawScene();
-            System.out.println("End je " + end.getY());
-        }
-
-        if (isDraggingRectangle) {
-            end = new Point2D(e.getX(), e.getY());
-            rectangle.setTemporaryEnd(end);
             drawScene();
         }
     }
@@ -466,10 +458,6 @@ public class Controller2D implements Controller {
 
         for (Rectangle r : rectangles) {
             updateClippedAndFill(r);
-        }
-
-        for (Line l : lines) {
-            liner.rasterize(l);
         }
 
         panel.repaint();
