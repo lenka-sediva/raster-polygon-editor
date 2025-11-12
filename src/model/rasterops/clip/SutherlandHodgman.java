@@ -37,10 +37,13 @@ public class SutherlandHodgman {
             // poslední vrchol polygonu = S (start) pro kontrolu hran
             Point2D S = in.getLast();
 
+            // orientace ořezávacího polygonu
+            int orientation = cuttingPolygon.getOrientation();
+
             // pro každý bod ořezávaného polygonu
             for (Point2D P : in) {
-                boolean P_inside = clipEdge.isInside(P);
-                boolean S_inside = clipEdge.isInside(S);
+                boolean P_inside = clipEdge.isInside(P, orientation);
+                boolean S_inside = clipEdge.isInside(S, orientation);
 
                 if (P_inside) {
                     if (!S_inside) {

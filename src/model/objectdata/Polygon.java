@@ -127,4 +127,23 @@ public class Polygon {
         }
         return arr;
     }
+
+    /**
+     * Určí orientaci polygonu (CW nebo CCW)
+     * @return +1 pokud je polygon CCW (proti směru hodinových ručiček)
+     *         -1 pokud je polygon CW (ve směru hodinových ručiček)
+     */
+    public int getOrientation() {
+        if (polygon.size() < 3) return 1; // výchozí CCW
+
+        double sum = 0;
+
+        for (int i = 0; i < polygon.size(); i++) {
+            Point2D p1 = polygon.get(i);
+            Point2D p2 = polygon.get((i + 1) % polygon.size());
+            sum += (p2.getX() - p1.getX()) * (p2.getY() + p1.getY());;
+        }
+
+        return sum < 0 ? 1 : -1; // CCW = 1, CW = -1
+    }
 }

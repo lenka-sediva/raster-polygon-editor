@@ -140,14 +140,14 @@ public class Line {
         return (intersections % 2) != 0; // lichý počet průsečíků = uvnitř
     }
 
-    public boolean isInside(Point2D p){
+    public boolean isInside(Point2D p, int orientation) {
         // tečný vektor
         double tx = end.getX() - start.getX();
         double ty = end.getY() - start.getY();
 
         // normálový vektor
-        double nx = -ty;
-        double ny = tx;
+        double nx = -ty * orientation;
+        double ny = tx * orientation;
 
         // směrový vektor k bodu p
         double sx = p.getX() - start.getX();
@@ -156,7 +156,8 @@ public class Line {
         // skalární součin normálového a směrového vektoru
         double dot = nx * sx + ny * sy;
 
-        // true: cos alpha musí být > 0
+        // true: cos alpha musí být >= 0
+        // bod je uvnitř nebo na hraně
         return dot >= 0;
     }
 }
