@@ -22,7 +22,7 @@ import java.util.List;
 public class Controller2D implements Controller {
 
     private final Panel panel;
-    private LineRasterizer liner;
+    private final LineRasterizer liner;
     private final PolygonRasterizer polygonRasterizer;
     private boolean isRasterizingWithShift = false;
 
@@ -249,6 +249,28 @@ public class Controller2D implements Controller {
                         };
                         panel.setPatternText("Pattern: " + patternName + " [V]");
                         drawScene();
+                        break;
+
+                    // odebrání poslední úsečky polygonu
+                    case KeyEvent.VK_Z:
+                        if(!lines.isEmpty()) {
+                            Line lastLine = lines.removeLast();
+                            lines.add(lastLine);
+                            if (polygon.size() > 0) {
+                                polygon.removeItem(polygon.size() - 1);
+                            }
+                            drawScene();
+                        }
+                        break;
+
+                    // vrácení poslední odebrané úsečky
+                    case KeyEvent.VK_Y:
+                        if(!lines.isEmpty()) {
+                            Line redoLine = lines.removeLast();
+                            lines.add(redoLine);
+                            polygon.addItem(redoLine.getEnd());
+                            drawScene();
+                        }
                         break;
                 }
             }
