@@ -44,14 +44,4 @@ public class Rectangle extends Polygon {
         addItem(p3);
         addItem(p4);
     }
-
-    public void setTemporaryEnd(Point2D end) {
-        if (size() < 2) {
-            if (size() == 0) return;
-            addItem(end);
-        } else {
-            removeItem(1);
-            addItemToIndex(1, end);
-        }
-    }
 }
