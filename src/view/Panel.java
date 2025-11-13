@@ -12,6 +12,7 @@ public class Panel extends JPanel {
     private String drawModeText = "";
     private String drawModeShortcut = "";
     private String patternText = "";
+    private String fillModeText = "";
 
     public Panel(int width, int height) {
         setPreferredSize(new Dimension(width, height));
@@ -24,9 +25,15 @@ public class Panel extends JPanel {
         raster.repaint(g);
         g.setColor(Color.WHITE);
         g.setFont(new Font("SansSerif", Font.BOLD, 16));
+        g.drawString(fillModeText, 10, getHeight() - 60);
         g.drawString(drawModeText, 10, getHeight() - 35);
         g.drawString(patternText, 10, getHeight() - 10);
         g.drawString(drawModeShortcut, getWidth() - 125, getHeight() - 10);
+    }
+
+    public void setFillModeText(String fillModeText) {
+        this.fillModeText = fillModeText;
+        repaint();
     }
 
     public void setDrawModeText(String drawModeText) {

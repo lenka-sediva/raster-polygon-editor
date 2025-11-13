@@ -16,7 +16,9 @@ import view.Panel;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.List;
 
 public class Controller2D implements Controller {
@@ -30,7 +32,9 @@ public class Controller2D implements Controller {
     private final List<Rectangle> rectangles = new ArrayList<>();
     private Polygon polygon = new Polygon();
     private Polygon pentagon; // původní polygon, podle kterého se ořezává
-    private final List<Line> lines; // ukládání úseček pro možné budoucí využití
+    private final List<Line> lines; // ukládání úseček
+    private final Deque<Line> undoStack = new ArrayDeque<>();
+    private final Deque<Line> redoStack = new ArrayDeque<>();
     private Color polygonColor = Color.BLUE;
     private final DashedLineRasterizer dashedLiner;
 
@@ -47,14 +51,17 @@ public class Controller2D implements Controller {
     private boolean fillMode = false;
 
     // obdélník
-    Point2D start, end;
-    boolean drawingBase = false;
-    Rectangle rectangle;
+    private Point2D start, end;
+    private boolean drawingBase = false;
+    private Rectangle rectangle;
     private boolean waitingForHeight = false;
 
     // 2 módy
     public enum DrawMode { POLYGON, RECTANGLE }
     private DrawMode currentMode = DrawMode.POLYGON;
+
+    public enum FillModeType { ON, OFF }
+    private FillModeType currentFillMode = FillModeType.OFF;
 
     private Polygon selectedPolygon = null;
 
@@ -72,7 +79,8 @@ public class Controller2D implements Controller {
         seedFill = new SeedFill(panel.getRaster());
         scanLine = new ScanLine(panel.getRaster(), polygon, polygonRasterizer);
 
-        panel.setDrawModeText("Mode: " + currentMode.name() + " [P]");
+        panel.setFillModeText("Fill mode: OFF [L]");
+        panel.setDrawModeText("Mode: POLYGON [P]");
         panel.setDrawModeShortcut("[E] pro obdélník");
         panel.setPatternText("Pattern: Vertical Stripes [V]"); // výchozí pattern
 
@@ -121,6 +129,49 @@ public class Controller2D implements Controller {
                     case POLYGON -> handlePolygonPressed(newPoint, e);
                     case RECTANGLE -> handleRectanglePressed(newPoint);
                 }
+
+                PatternFill pattern = PatternFill.verticalStripes(
+                        5,
+                        polygonColor,
+                        RasterBI.getBackgroundColor() == Color.BLACK ? Color.WHITE : Color.BLACK
+                );
+
+                seedFill.setSeed(
+                        newPoint.getX(),
+                        newPoint.getY(),
+                        Color.RED.getRGB(),
+                        polygonColor.getRGB(), // 0, pokud chceme vyplňovat podle pozadí namísto hranice
+                        pattern, // stačí dát null, pokud chceme vybarvení jednolitě
+                        false
+                );
+
+                if(!fillMode && currentMode == DrawMode.POLYGON) {
+                    // levé tlačítko - přidání prvního bodu polygonu (nutné, jinak nejde drag prvního bodu)
+                    if (polygon.size() == 0) {
+                        polygon.addItem(newPoint);
+                        drawScene();
+                    }
+                }
+
+                if (fillMode) {
+                    // vyplňování od semínka (kliknutí)
+                    // TODO dodělat seedFill, aby zůstal
+                    // TODO přidat mody seedFill - jednotitě, vzory + střídat pomocí klávesy
+                    // TODO nemusí být isPointInsidePolygon, pokud chci vyplnit všechno až do hranice
+                    // TODO zábranit drag, když je zmáčknuté L
+                    if (Line.isPointInsidePolygon(newPoint, polygon)) {
+                        seedFill.fill();
+                        panel.repaint();
+                    }
+
+                    for (Rectangle r : rectangles) {
+                        if (Line.isPointInsidePolygon(newPoint, r)) {
+                            seedFill.fill();
+                            panel.repaint();
+                            break;
+                        }
+                    }
+                }
             }
 
             @Override
@@ -137,13 +188,12 @@ public class Controller2D implements Controller {
             public void mouseDragged(MouseEvent e) {
                 drawScene();
 
-                // změna pozice vybraného vrcholu
+                // změna pozice vybraného vrcholu polygonu
                 if(isDragging && draggedPointIndex != -1) {
                     Point2D dragged = selectedPolygon.getItem(draggedPointIndex);
                     dragged.setX(e.getX());
                     dragged.setY(e.getY());
-                    // po posunu vrchol automaticky přepočítává ořezaný polygon a vyplní ho
-                    drawScene();
+                    drawScene(); // po posunu vrchol automaticky přepočítává ořezaný polygon a vyplní ho
                     return;
                 }
 
@@ -163,7 +213,7 @@ public class Controller2D implements Controller {
                     }
                 }
 
-                // obdélník
+                // obdélník - přidání 2. bodu (konce základny) pomocí dragu myši
                 if (currentMode == DrawMode.RECTANGLE && drawingBase) {
                     drawScene();
                     end = new Point2D(e.getX(), e.getY());
@@ -184,7 +234,6 @@ public class Controller2D implements Controller {
                         polygon.clear();
                         lines.clear();
                         rectangles.clear();
-                        scanLine = new ScanLine(panel.getRaster(), new Polygon(), polygonRasterizer);
                         drawScene();
                         break;
 
@@ -193,7 +242,7 @@ public class Controller2D implements Controller {
                         isRasterizingWithShift = true;
                         break;
 
-                    // přidání nového vrcholu do nejbližší hrany
+                    // přidání nového vrcholu polygonu do nejbližší hrany
                     case KeyEvent.VK_N:
                         Point2D cursor = getCursorPosition();
                         int insertIndex = Polygon.findNearestLine(cursor, polygon);
@@ -222,16 +271,21 @@ public class Controller2D implements Controller {
                         chooseLineColor();
                         break;
 
+                    // přepne na režim vyplňování pro seedfill
                     case KeyEvent.VK_L:
-                        fillMode = !fillMode; // fillMode = true při držení
+                        fillMode = !fillMode;
+                        currentFillMode = (currentFillMode == FillModeType.ON) ? FillModeType.OFF : FillModeType.ON;
+                        panel.setFillModeText("Fill mode: " + currentFillMode.name() + " [L]");
                         break;
 
+                    // mód polygonu
                     case KeyEvent.VK_P:
                         currentMode = DrawMode.POLYGON;
                         panel.setDrawModeText("Mode: " + currentMode.name() + " [P]");
                         panel.setDrawModeShortcut("[E] pro obdélník");
                         break;
 
+                    // mód obdélníku
                     case KeyEvent.VK_E:
                         currentMode = DrawMode.RECTANGLE;
                         panel.setDrawModeText("Mode: " + currentMode.name() + " [E]");
@@ -253,9 +307,17 @@ public class Controller2D implements Controller {
 
                     // odebrání poslední úsečky polygonu
                     case KeyEvent.VK_Z:
-                        if(!lines.isEmpty()) {
-                            Line lastLine = lines.removeLast();
-                            lines.add(lastLine);
+                        if (!undoStack.isEmpty()) {
+                            Line last = undoStack.removeLast(); // vezmi poslední provedenou akci
+                            redoStack.addLast(last); // přesun do redo
+                            // odeber z lines (poslední výskyt)
+                            for (int i = lines.size() - 1; i >= 0; i--) {
+                                if (lines.get(i) == last) {
+                                    lines.remove(i);
+                                    break;
+                                }
+                            }
+                            // odeber bod z polygonu (pokud tam je)
                             if (polygon.size() > 0) {
                                 polygon.removeItem(polygon.size() - 1);
                             }
@@ -265,9 +327,10 @@ public class Controller2D implements Controller {
 
                     // vrácení poslední odebrané úsečky
                     case KeyEvent.VK_Y:
-                        if(!lines.isEmpty()) {
-                            Line redoLine = lines.removeLast();
-                            lines.add(redoLine);
+                        if (!redoStack.isEmpty()) {
+                            Line redoLine = redoStack.removeLast(); // vezmi poslední odebranou akci
+                            undoStack.addLast(redoLine); // vrať do historie
+                            lines.add(redoLine); // znovu do zobrazení
                             polygon.addItem(redoLine.getEnd());
                             drawScene();
                         }
@@ -318,36 +381,6 @@ public class Controller2D implements Controller {
     }
 
     private void handlePolygonPressed(Point2D newPoint, MouseEvent e) {
-        PatternFill pattern = PatternFill.verticalStripes(
-                5,
-                polygonColor,
-                RasterBI.getBackgroundColor() == Color.BLACK ? Color.WHITE : Color.BLACK
-        );
-        if(!fillMode) {
-            // běžný režim kreslení polygonu
-            // levé tlačítko - přidání prvního bodu polygonu (nutné, jinak nejde drag prvního bodu)
-            if (polygon.size() == 0) {
-                polygon.addItem(newPoint);
-                drawScene();
-            }
-        } else {
-            // vyplňování od semínka (kliknutí)
-            // TODO dodělat seedFill, aby zůstal
-            // TODO přidat mody seedFill - jednotlivě, vzory + střídat pomocí klávesy
-            if (polygon.size() >= 3 && Line.isPointInsidePolygon(newPoint, polygon)) {
-                seedFill.setSeed(
-                        newPoint.getX(),
-                        newPoint.getY(),
-                        Color.RED.getRGB(),
-                        polygonColor.getRGB(), // 0, pokud chceme vyplňovat podle pozadí namísto hranice
-                        pattern, // stačí dát null, pokud chceme vybarvení jednolitě
-                        false
-                );
-                seedFill.fill();
-                panel.repaint();
-            }
-        }
-
         // pravé tlačítko - najde nejbližší bod pro tažení (změna vrcholu)
         if (e.getButton() == MouseEvent.BUTTON3) {
             // porovnání vzdálenosti kurzoru k nejbližším bodům polygonů
@@ -394,11 +427,14 @@ public class Controller2D implements Controller {
             polygon.addItem(newPoint);
         }
         lines.add(tempLine);
+        undoStack.addLast(tempLine);
+        redoStack.clear();
         drawScene();
     }
 
     private void handleRectanglePressed(Point2D newPoint) {
         // TODO přidat vyplňování SeedFill
+        // TODO potřebuju drawingBase a waitingForHeight ?
         if (start == null) {
             // 1. klik = začátek základny
             start = newPoint;
@@ -412,8 +448,8 @@ public class Controller2D implements Controller {
             rectangles.add(rectangle);
             start = null;
             end = null;
-            waitingForHeight = false;
             rectangle = null;
+            waitingForHeight = false;
             drawScene();
         }
     }
