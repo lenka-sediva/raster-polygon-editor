@@ -339,7 +339,7 @@ public class Controller2D implements Controller {
                         newPoint.getX(),
                         newPoint.getY(),
                         Color.RED.getRGB(),
-                        polygonColor.getRGB(), // TODO hranice
+                        polygonColor.getRGB(), // 0, pokud chceme vyplňovat podle pozadí namísto hranice
                         pattern, // stačí dát null, pokud chceme vybarvení jednolitě
                         false
                 );

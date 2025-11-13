@@ -30,9 +30,11 @@ public class SeedFill implements Filler {
 
     @Override
     public void fill() {
-        //seedFillStack(startX, startY, fillCol, pattern, fill8);
-        //seedFillQueue(startX, startY, fillCol, borderCol, pattern, fill8);
-        seedFillDeque(startX, startY, fillCol, borderCol, pattern, fill8);
+        if (borderCol == 0) { // není nastavena hranice
+            seedFillStack(startX, startY, fillCol, pattern, fill8);
+        } else {
+            seedFillQueue(startX, startY, fillCol, borderCol, pattern, fill8);
+        }
     }
 
     /**
@@ -92,19 +94,22 @@ public class SeedFill implements Filler {
 
     /**
      * Metoda záplavového algoritmu pro 4-spojitou i 8-spojitou oblast pomocí fronty
-     * Omezující podle POZADÍ
+     * Omezující podle HRANICE
      * @param x x-ová souřadnice semínka
      * @param y y-ová souřadnice semínka
      * @param fillCol nová barva, jakou má být útvar vyplněný
+     * @param borderCol barva hranice, kterou má být útvar omezený
      * @param pattern vzor výplně (pokud je null, použije se fillCol)
      * @param fill8 true, pokud chceme vyplňovat 8 spojitě
      */
-    public void seedFillQueue(int x, int y, int fillCol, PatternFill pattern, boolean fill8) {
-        int backgroundColor = raster.getPixel(x,y);
+    public void seedFillQueue(int x, int y, int fillCol, int borderCol, PatternFill pattern, boolean fill8) {
+        int width = raster.getWidth();
+        int height = raster.getHeight();
 
-        if (backgroundColor == fillCol) {
-            return;
-        }
+        int startColor = raster.getPixel(x, y); // semínko
+
+        // omezení hranicí
+        if (startColor == borderCol) return;
 
         Queue<Point2D> queue = new LinkedList<>();
         queue.add(new Point2D(x, y));
@@ -114,84 +119,31 @@ public class SeedFill implements Filler {
             x = p.getX();
             y = p.getY();
 
-            if (x < 0 || y < 0 || x >= raster.getWidth() || y >= raster.getHeight()) {
+            if (x < 0 || y < 0 || x >= width || y >= height) {
                 continue;
             }
 
-            int targetColor = (pattern == null) ? fillCol : pattern.getColor(x,y).getRGB();
-
             int pixelColor = raster.getPixel(x, y);
 
-            if (pixelColor == backgroundColor) {
-                raster.setPixel(x, y, targetColor);
-
-                queue.offer(new Point2D(x + 1, y));
-                queue.offer(new Point2D(x - 1, y));
-                queue.offer(new Point2D(x, y + 1));
-                queue.offer(new Point2D(x, y - 1));
-
-                if(fill8) {
-                    queue.offer(new Point2D(x + 1, y + 1));
-                    queue.offer(new Point2D(x - 1, y - 1));
-                    queue.offer(new Point2D(x + 1, y - 1));
-                    queue.offer(new Point2D(x - 1, y + 1));
-                }
-            }
-        }
-
-    }
-
-    /**
-     * Metoda záplavového algoritmu pro 4-spojitou i 8-spojitou oblast pomocí deque
-     * Omezující podle HRANICE
-     * @param x x-ová souřadnice semínka
-     * @param y y-ová souřadnice semínka
-     * @param fillCol nová barva, jakou má být útvar vyplněný
-     * @param borderCol barva hranice, kterou má být útvar omezený
-     * @param pattern vzor výplně (pokud je null, použije se fillCol)
-     * @param fill8 true, pokud chceme vyplňovat 8 spojitě
-     */
-    public void seedFillDeque(int x, int y, int fillCol, int borderCol, PatternFill pattern, boolean fill8) {
-        int width = raster.getWidth();
-        int height = raster.getHeight();
-
-        int startColor = raster.getPixel(x, y);
-
-        if (startColor == fillCol || startColor == borderCol) return;
-
-        boolean isPatternFill = (pattern != null);
-
-        Deque<Point2D> points = new ArrayDeque<>();
-        points.push(new Point2D(x, y));
-
-        while (!points.isEmpty()) {
-            Point2D p = points.pop();
-            x = p.getX();
-            y = p.getY();
-
-            if (x < 0 || y < 0 || x >= width || y >= height) continue;
-
-            int pixelColor = raster.getPixel(x, y);
-
-            // pokud je pixel hranicí nebo už vyplněn
-            if (pixelColor == fillCol || pixelColor == borderCol) continue;
+            // pokud je pixel už vyplněn
+            if (pixelColor == borderCol) continue;
 
             // pokud vyplňujeme vzorem, vynecháme všechny pixely, které nejsou startColor
-            if (isPatternFill && pixelColor != startColor) continue;
+            if (pattern != null && pixelColor != startColor) continue;
 
-            int targetColor = isPatternFill ? pattern.getColor(x, y).getRGB() : fillCol;
+            int targetColor = (pattern == null) ? fillCol : pattern.getColor(x, y).getRGB();
             raster.setPixel(x, y, targetColor);
 
-            points.push(new Point2D(x + 1, y));
-            points.push(new Point2D(x - 1, y));
-            points.push(new Point2D(x, y + 1));
-            points.push(new Point2D(x, y - 1));
+            queue.offer(new Point2D(x + 1, y));
+            queue.offer(new Point2D(x - 1, y));
+            queue.offer(new Point2D(x, y + 1));
+            queue.offer(new Point2D(x, y - 1));
 
-            if (fill8) {
-                points.push(new Point2D(x + 1, y + 1));
-                points.push(new Point2D(x - 1, y - 1));
-                points.push(new Point2D(x + 1, y - 1));
-                points.push(new Point2D(x - 1, y + 1));
+            if(fill8) {
+                queue.offer(new Point2D(x + 1, y + 1));
+                queue.offer(new Point2D(x - 1, y - 1));
+                queue.offer(new Point2D(x + 1, y - 1));
+                queue.offer(new Point2D(x - 1, y + 1));
             }
         }
     }
