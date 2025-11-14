@@ -3,11 +3,11 @@ package model.rasterops.rasterizer;
 import model.rasterdata.Raster;
 
 /**
- * Třída FilledLineRasterizer vykresluje úsečky pomocí algoritmu Xiaolin Wu
- * Ten dědí ze třídy LineRasterizerXiaolinWu, která je potomkem třídy LineRasterizer
+ * Třída FilledLineRasterizer vykresluje úsečky pomocí Bresenhamova algoritmu
+ * Ten dědí ze třídy LineRasterizerBresenham, která je potomkem třídy LineRasterizer
  */
 
-public class FilledLineRasterizer extends LineRasterizerXiaolinWu {
+public class FilledLineRasterizer extends LineRasterizerBresenham {
     public FilledLineRasterizer(Raster raster) {
         super(raster);
     }

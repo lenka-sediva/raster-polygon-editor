@@ -1,9 +1,11 @@
 package model.rasterops.rasterizer;
 
+import model.objectdata.Point2D;
 import model.rasterdata.Raster;
 
 /**
  * Bresenhamův algoritmus
+ * S podporou tlustých čar (efekt kapsle)
  *
  * Popis:
  * - postupně prochází osu x nebo y od počátečního bodu k cílovému
@@ -37,8 +39,12 @@ public class LineRasterizerBresenham extends LineRasterizer {
 
         int error = dx - dy; // počáteční chyba (odchylka) od ideální úsečky
 
+        int thickness = 3; // tloušťka čáry
+        int radius = thickness / 2; // poloměr kruhu kolem každého pixelu (kapsle)
+
         while (true) {
-            raster.setPixel(x1, y1, color.getRGB());
+            // vykreslí kruh kolem aktuálního bodu, aby byla čára silná
+            drawCircleCapsule(x1, y1, radius);
 
             if (x1 == x2 && y1 == y2) break; // konec při dosažení koncového bodu
 
@@ -54,6 +60,37 @@ public class LineRasterizerBresenham extends LineRasterizer {
             if (e2 < dx) {
                 error = error + dx;
                 y1 = y1 + sy;
+            }
+        }
+    }
+
+    /**
+     * Metoda kreslící kruhy kolem každého bodu čáry (pixelu), aby vzniklá souvislá silná čára
+     * @param x x-ová souřadnice středu kruhu
+     * @param y y-ová souřadnice středu kruhu
+     * @param radius poloměr kruhu (polovina tloušťky čáry)
+     */
+    private void drawCircleCapsule(int x, int y, int radius) {
+        // ohraničuje čtverec kolem středu kruhu
+        int minX = x - radius;
+        int maxX = x + radius;
+        int minY = y - radius;
+        int maxY = y + radius;
+
+        // prochází všechny pixely
+        for (int py = minY; py <= maxY; py++) {
+            for (int px = minX; px <= maxX; px++) {
+                if (px < 0 || py < 0 || px >= raster.getWidth() || py >= raster.getHeight()) continue;
+
+                // vzdálenost od středu kruhu
+                Point2D p = new Point2D(px, py);
+                Point2D center = new Point2D(x, y);
+                double dist = p.distanceTo(center);
+
+                // pokud je uvnitř kruhu, vykreslí pixel
+                if (dist <= radius) {
+                    raster.setPixel(px, py, color.getRGB());
+                }
             }
         }
     }
