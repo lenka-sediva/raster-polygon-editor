@@ -30,9 +30,8 @@ public class Controller2D implements Controller {
 
     private final List<Polygon> polygons = new ArrayList<>();
     private final List<Rectangle> rectangles = new ArrayList<>();
-    private Polygon polygon = new Polygon();
+    private Polygon polygon = new Polygon(); // aktuálně kreslený polygon
     private Polygon pentagon; // původní polygon, podle kterého se ořezává
-    private final List<Line> lines; // ukládání úseček
     private final Deque<Line> undoStack = new ArrayDeque<>();
     private final Deque<Line> redoStack = new ArrayDeque<>();
     private Color polygonColor = Color.BLUE;
@@ -67,8 +66,6 @@ public class Controller2D implements Controller {
         polygonRasterizer = new PolygonRasterizer(liner);
         liner.setColor(polygonColor);
 
-        this.lines = new ArrayList<>();
-
         this.dashedLiner = new DashedLineRasterizer(panel.getRaster());
 
         seedFill = new SeedFill(panel.getRaster());
@@ -94,8 +91,6 @@ public class Controller2D implements Controller {
         pentagon.addItem(new Point2D(330, 500));
         pentagon.addItem(new Point2D(170, 500));
         pentagon.addItem(new Point2D(100, 300));
-
-        polygons.add(pentagon);
 
         polygon = new Polygon();
         polygons.add(polygon);
@@ -149,20 +144,10 @@ public class Controller2D implements Controller {
                     return;
                 }
 
-                if (fillMode) {
-                    // vyplňování od semínka (kliknutí)
-                    if (Line.isPointInsidePolygon(newPoint, polygon)) {
-                        seedFill.fill();
-                        panel.repaint();
-                    }
-
-                    for (Rectangle r : rectangles) {
-                        if (Line.isPointInsidePolygon(newPoint, r)) {
-                            seedFill.fill();
-                            panel.repaint();
-                            break;
-                        }
-                    }
+                // vyplňování od semínka (kliknutí)
+                if (fillMode && isInsideAnyShape(newPoint)) {
+                    seedFill.fill();
+                    panel.repaint();
                 }
             }
 
@@ -234,9 +219,12 @@ public class Controller2D implements Controller {
                     // vymazání plátna
                     case KeyEvent.VK_C:
                         panel.clear();
-                        polygon.clear();
-                        lines.clear();
+                        polygons.clear();
+                        polygon = new Polygon();
+                        polygons.add(polygon);
                         rectangles.clear();
+                        undoStack.clear();
+                        redoStack.clear();
                         drawScene();
                         break;
 
@@ -313,17 +301,8 @@ public class Controller2D implements Controller {
                         if (!undoStack.isEmpty()) {
                             Line last = undoStack.removeLast(); // vezme poslední provedenou akci
                             redoStack.addLast(last); // přesun do redo
-                            // odebere poslední výskyt z lines
-                            for (int i = lines.size() - 1; i >= 0; i--) {
-                                if (lines.get(i) == last) {
-                                    lines.remove(i);
-                                    break;
-                                }
-                            }
-                            // odebere bod z polygonu, pokud tam je
-                            if (polygon.size() > 0) {
-                                polygon.removeItem(polygon.size() - 1);
-                            }
+                            Polygon parent = last.getParentPolygon(); // zjistí, jakému polygonu úsečka patří
+                            parent.removeItem(parent.size() - 1); // smaže poslední vrchol z příslušného polygonu
                             drawScene();
                         }
                         break;
@@ -333,10 +312,17 @@ public class Controller2D implements Controller {
                         if (!redoStack.isEmpty()) {
                             Line redoLine = redoStack.removeLast(); // vezme poslední odebranou akci
                             undoStack.addLast(redoLine); // vratí do historie
-                            lines.add(redoLine); // znovu do zobrazení
-                            polygon.addItem(redoLine.getEnd());
+                            Polygon parent = redoLine.getParentPolygon();
+                            parent.addItem(redoLine.getEnd());
                             drawScene();
                         }
+                        break;
+
+                    // uzavře polygon
+                    case KeyEvent.VK_ESCAPE:
+                        polygon = new Polygon();
+                        polygons.add(polygon);
+                        drawScene();
                         break;
                 }
             }
@@ -385,7 +371,7 @@ public class Controller2D implements Controller {
     }
 
     private boolean isInsideAnyShape(Point2D p) {
-        if (Line.isPointInsidePolygon(p, polygon)) return true;
+        for (Polygon poly : polygons) if (Line.isPointInsidePolygon(p, poly)) return true;
         for (Rectangle r : rectangles) if (Line.isPointInsidePolygon(p, r)) return true;
         return false;
     }
@@ -426,11 +412,11 @@ public class Controller2D implements Controller {
             return;
         }
 
-        if(fillMode) return; // v režimu vyplňování se po kliknutí nepřidává nový bod
+        if (fillMode) return; // v režimu vyplňování se po kliknutí nepřidává nový bod
 
         // přidání nového vrcholu polygonu
         Point2D newPoint = new Point2D(e.getX(), e.getY());
-        Line tempLine = new Line(polygon.getLast(), newPoint);
+        Line tempLine = new Line(polygon.getLast(), newPoint, polygon);
 
         if (isRasterizingWithShift) {
             Point2D suitablePoint = polygon.findNearestPointToAxisCandidates(tempLine);
@@ -439,7 +425,6 @@ public class Controller2D implements Controller {
         } else {
             polygon.addItem(newPoint);
         }
-        lines.add(tempLine);
         undoStack.addLast(tempLine);
         redoStack.clear();
         drawScene();
@@ -480,8 +465,6 @@ public class Controller2D implements Controller {
             // 2. bod základny
             rectangle.addItem(end);
             rectangles.add(rectangle);
-            Line base = new Line(start, end);
-            lines.add(base);
             drawScene();
         }
     }
@@ -489,19 +472,15 @@ public class Controller2D implements Controller {
     public void drawScene() {
         panel.getRaster().clear(); // aby se stále dokola nevykreslovaly pružné čáry, ale jen 1
 
-        // vykreslí všechny uložené polygony
+        polygonRasterizer.rasterize(pentagon); // vykreslení pentagonu
+
         for (Polygon p : polygons) {
             polygonRasterizer.rasterize(p); // vykreslení hranice
+            updateClippedAndFill(p); // ořez a vyplnění
         }
 
-        // vykreslí všechny uložené obdélníky
         for (Rectangle r : rectangles) {
             polygonRasterizer.rasterize(r);
-        }
-
-        updateClippedAndFill(polygon); // ořízne polygon podle pentagonu a vyplní vzniklý tvar
-
-        for (Rectangle r : rectangles) {
             updateClippedAndFill(r);
         }
 

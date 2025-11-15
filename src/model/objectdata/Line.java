@@ -6,6 +6,7 @@ public class Line {
     private Point2D start;
     private Point2D end;
     private final int color;
+    private Polygon polygon; // polygon, do kterého Line patří
 
     public Line(Point2D start, Point2D end) {
         this.start = start;
@@ -31,6 +32,13 @@ public class Line {
         this.color = color;
     }
 
+    public Line(Point2D start, Point2D end, Polygon polygon) {
+        this.start = start;
+        this.end = end;
+        this.color = Color.WHITE.getRGB();
+        this.polygon = polygon;
+    }
+
     public Point2D getStart() {
         return start;
     }
@@ -41,6 +49,10 @@ public class Line {
 
     public int getColor() {
         return color;
+    }
+
+    public Polygon getParentPolygon() {
+        return polygon;
     }
 
     /**
