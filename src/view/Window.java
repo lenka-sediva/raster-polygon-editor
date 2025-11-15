@@ -50,7 +50,6 @@ public class Window extends JFrame {
         JPanel leftPanel = new JPanel();
         leftPanel.setLayout(new BoxLayout(leftPanel, BoxLayout.Y_AXIS));
         leftPanel.add(new JLabel("Přidání nového vrcholu polygonu: levé tlačítko myši"));
-        leftPanel.add(new JLabel("Změna barvy pozadí: [B]"));
         leftPanel.add(new JLabel("Přidání vrcholu na nejbližší hranu polygonu: [N]"));
         leftPanel.add(new JLabel("Vymazání plátna: [C]"));
         leftPanel.add(new JLabel("Změna barvy útvarů: [F]"));
