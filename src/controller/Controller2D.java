@@ -204,7 +204,7 @@ public class Controller2D implements Controller {
                 dashedLiner.setGradient(polygonColor, Color.RED); // gradient vždy od vybrané barvy do červené
 
                 // vykreslení pružné dashed čáry
-                if(polygon.size() > 0) {
+                if(polygon.size() > 0 && currentMode == DrawMode.POLYGON) {
                     Point2D newPoint = new Point2D(e.getX(), e.getY());
                     Line tempLine = new Line(polygon.getLast(), newPoint);
 
@@ -264,9 +264,8 @@ public class Controller2D implements Controller {
                         }
                         break;
 
-                    // výběr barvy vykreslování
+                    // otevře dialog pro výběr barvy vykreslování
                     case KeyEvent.VK_B:
-                        // otevře dialog pro výběr barvy
                         Color selectedColor = JColorChooser.showDialog(panel, "Vyber barvu úsečky", polygonColor);
                         if (selectedColor != null) {
                             polygonColor = selectedColor;
@@ -393,9 +392,8 @@ public class Controller2D implements Controller {
 
     private void handlePolygonPressed(Point2D newPoint, MouseEvent e) {
         if(!fillMode) {
-            // levé tlačítko - přidání prvního bodu polygonu (nutné, jinak nejde drag prvního bodu)
             if (polygon.size() == 0) {
-                polygon.addItem(newPoint);
+                polygon.addItem(newPoint); // přidání prvního bodu polygonu (nutné, jinak nejde drag prvního bodu)
             }
         }
 
