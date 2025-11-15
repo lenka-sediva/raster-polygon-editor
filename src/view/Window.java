@@ -12,7 +12,7 @@ public class Window extends JFrame {
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setResizable(true);
-        setTitle("PGRF1 2025: Task 1 by Lenka Šedivá");
+        setTitle("PGRF1 2025: Task 2 by Lenka Šedivá");
 
         add(panel, BorderLayout.CENTER);
         pack();
@@ -52,14 +52,16 @@ public class Window extends JFrame {
         leftPanel.add(new JLabel("Přidání nového vrcholu polygonu: levé tlačítko myši"));
         leftPanel.add(new JLabel("Přidání vrcholu na nejbližší hranu polygonu: [N]"));
         leftPanel.add(new JLabel("Vymazání plátna: [C]"));
-        leftPanel.add(new JLabel("Změna barvy útvarů: [F]"));
+        leftPanel.add(new JLabel("Změna barvy útvarů: [B]"));
+        leftPanel.add(new JLabel("Odebrání poslední úsečky polygonu: [Z]"));
 
         JPanel rightPanel = new JPanel();
         rightPanel.setLayout(new BoxLayout(rightPanel, BoxLayout.Y_AXIS));
         rightPanel.add(new JLabel("Posunutí vrcholu polygonu: pravé tlačítko myši"));
-        rightPanel.add(new JLabel("Zobrazování úseček: [SHIFT]"));
         rightPanel.add(new JLabel("Smazání nejbližšího vrcholu polygonu: [R]"));
-        rightPanel.add(new JLabel("Vyplnění polygonu SeedFill: [L]"));
+        rightPanel.add(new JLabel("Zobrazování úseček ve 3 směrech: [SHIFT]"));
+        rightPanel.add(new JLabel("Vyplnění útvaru Seed Fill: [F]"));
+        rightPanel.add(new JLabel("Vrácení úsečky zpět: [Y]"));
 
         columnsPanel.add(leftPanel);
         columnsPanel.add(rightPanel);

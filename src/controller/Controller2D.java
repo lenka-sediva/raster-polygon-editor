@@ -40,6 +40,7 @@ public class Controller2D implements Controller {
 
     private int draggedPointIndex = -1; // žádný bod není vybraný pro tažení
     private boolean isDragging = false;
+    private Polygon selectedPolygon = null;
 
     // vyplňování
     private SeedFill seedFill;
@@ -47,7 +48,6 @@ public class Controller2D implements Controller {
     private int fillPatternIndex = 0;
     private static final int totalPatterns = 4;
     private boolean fillMode = false;
-    private PatternFill pattern;
 
     // obdélník
     private Point2D start, end;
@@ -59,8 +59,6 @@ public class Controller2D implements Controller {
 
     public enum FillModeType { ON, OFF }
     private FillModeType currentFillMode = FillModeType.OFF;
-
-    private Polygon selectedPolygon = null;
 
     public Controller2D(Panel panel) {
         this.panel = panel;
@@ -77,7 +75,7 @@ public class Controller2D implements Controller {
         scanLine = new ScanLine(panel.getRaster(), polygon, polygonRasterizer);
 
         // výchozí stavy
-        panel.setFillModeText("Fill mode: OFF [L]");
+        panel.setFillModeText("Fill mode: OFF [F]");
         panel.setDrawModeText("Mode: POLYGON [P]");
         panel.setDrawModeShortcut("[E] pro obdélník");
         panel.setPatternText("Pattern: Vertical Stripes [V]");
@@ -127,23 +125,28 @@ public class Controller2D implements Controller {
                     case RECTANGLE -> handleRectanglePressed(newPoint);
                 }
 
-                pattern = PatternFill.verticalStripes(5, polygonColor, Color.WHITE);
+                PatternFill pattern = PatternFill.cross(10, polygonColor, Color.WHITE);
 
                 seedFill.setSeed(
                         newPoint.getX(),
                         newPoint.getY(),
                         Color.WHITE.getRGB(),
-                        0, // 0, pokud chceme vyplňovat podle pozadí, polygonColor.getRGB() podle hranice
-                        pattern, // null (a zároveň hranice 0), pokud chceme vybarvení jednolitě
+                        0, // 0 = pokud chceme vyplňovat podle pozadí, polygonColor.getRGB() = podle hranice
+                        pattern, // null (a zároveň hranice 0) = pokud chceme vybarvení jednou barvou, pattern = pomocí vzoru
                         false
                 );
 
-                if(!fillMode && currentMode == DrawMode.POLYGON) {
-                    // levé tlačítko - přidání prvního bodu polygonu (nutné, jinak nejde drag prvního bodu)
-                    if (polygon.size() == 0) {
-                        polygon.addItem(newPoint);
-                        drawScene();
-                    }
+                int clickedColor = panel.getRaster().getPixel(newPoint.getX(), newPoint.getY());
+
+                // kontrola, zda už je oblast vyplněná scan line
+                if (fillMode && clickedColor != RasterBI.getBackgroundColor().getRGB()) {
+                    JOptionPane.showMessageDialog(
+                            panel,
+                            "Tato oblast už je vyplněná.",
+                            "Nelze vyplnit",
+                            JOptionPane.WARNING_MESSAGE
+                    );
+                    return;
                 }
 
                 if (fillMode) {
@@ -167,19 +170,10 @@ public class Controller2D implements Controller {
             public void mouseReleased(MouseEvent e) {
                 Point2D newPoint = new Point2D(e.getX(), e.getY());
 
-                boolean insideAnyRectangle = false;
-                for (Rectangle r : rectangles) {
-                    if (Line.isPointInsidePolygon(newPoint, r)) {
-                        insideAnyRectangle = true;
-                        break;
-                    }
-                }
-
-                if(fillMode && !Line.isPointInsidePolygon(newPoint, polygon) && !insideAnyRectangle) {
+                if(fillMode && !isInsideAnyShape(newPoint)) {
                     drawScene(); // překreslení scény, aby zmizela pružná čára
-                    // zobrazí upozornění uživateli
                     JOptionPane.showMessageDialog(panel,
-                            "Nelze tvořit nové útvary v režimu vyplňování.\nStisknutím [L] režim vypnete.",
+                            "Nelze tvořit nové útvary v režimu vyplňování.\nStisknutím [F] režim vypnete.",
                             "Režim vyplňování",
                             JOptionPane.WARNING_MESSAGE);
                     start = null; // reset obdélníku
@@ -271,7 +265,7 @@ public class Controller2D implements Controller {
                         break;
 
                     // výběr barvy vykreslování
-                    case KeyEvent.VK_F:
+                    case KeyEvent.VK_B:
                         // otevře dialog pro výběr barvy
                         Color selectedColor = JColorChooser.showDialog(panel, "Vyber barvu úsečky", polygonColor);
                         if (selectedColor != null) {
@@ -281,11 +275,11 @@ public class Controller2D implements Controller {
                         }
                         break;
 
-                    // přepne na režim vyplňování pro seedfill
-                    case KeyEvent.VK_L:
+                    // přepne na režim vyplňování pro seed fill
+                    case KeyEvent.VK_F:
                         fillMode = !fillMode;
                         currentFillMode = (currentFillMode == FillModeType.ON) ? FillModeType.OFF : FillModeType.ON;
-                        panel.setFillModeText("Fill mode: " + currentFillMode.name() + " [L]");
+                        panel.setFillModeText("Fill mode: " + currentFillMode.name() + " [F]");
                         break;
 
                     // mód polygonu
@@ -302,7 +296,7 @@ public class Controller2D implements Controller {
                         panel.setDrawModeShortcut("[P] pro polygon");
                         break;
 
-                    // přepínání vzorů po ořezu pro scanline
+                    // přepínání vzorů po ořezu pro scan line
                     case KeyEvent.VK_V:
                         fillPatternIndex = (fillPatternIndex + 1) % totalPatterns;
                         String patternName = switch (fillPatternIndex) {
@@ -318,16 +312,16 @@ public class Controller2D implements Controller {
                     // odebrání poslední úsečky polygonu
                     case KeyEvent.VK_Z:
                         if (!undoStack.isEmpty()) {
-                            Line last = undoStack.removeLast(); // vezmi poslední provedenou akci
+                            Line last = undoStack.removeLast(); // vezme poslední provedenou akci
                             redoStack.addLast(last); // přesun do redo
-                            // odeber z lines (poslední výskyt)
+                            // odebere poslední výskyt z lines
                             for (int i = lines.size() - 1; i >= 0; i--) {
                                 if (lines.get(i) == last) {
                                     lines.remove(i);
                                     break;
                                 }
                             }
-                            // odeber bod z polygonu (pokud tam je)
+                            // odebere bod z polygonu, pokud tam je
                             if (polygon.size() > 0) {
                                 polygon.removeItem(polygon.size() - 1);
                             }
@@ -338,8 +332,8 @@ public class Controller2D implements Controller {
                     // vrácení poslední odebrané úsečky
                     case KeyEvent.VK_Y:
                         if (!redoStack.isEmpty()) {
-                            Line redoLine = redoStack.removeLast(); // vezmi poslední odebranou akci
-                            undoStack.addLast(redoLine); // vrať do historie
+                            Line redoLine = redoStack.removeLast(); // vezme poslední odebranou akci
+                            undoStack.addLast(redoLine); // vratí do historie
                             lines.add(redoLine); // znovu do zobrazení
                             polygon.addItem(redoLine.getEnd());
                             drawScene();
@@ -361,8 +355,28 @@ public class Controller2D implements Controller {
         liner.setRaster(newRaster);
         dashedLiner.setRaster(newRaster);
         polygonRasterizer.setLiner(liner);
-        seedFill = new SeedFill(newRaster);  // aktualizace SeedFill s novým rastrem
+        seedFill = new SeedFill(newRaster); // aktualizace SeedFill s novým rastrem
         scanLine = new ScanLine(newRaster, polygon, polygonRasterizer);
+    }
+
+    // přepočítá clipped shape (polygon či obdélník ořezaný pentagonem) a provede scan line vyplnění
+    private void updateClippedAndFill(Polygon shape) {
+        SutherlandHodgman clipper = new SutherlandHodgman();
+        Polygon clipped = clipper.clip(shape, pentagon);
+
+        scanLine = new ScanLine(panel.getRaster(), clipped, polygonRasterizer);
+        scanLine.setPattern(getCurrentPattern());
+        scanLine.fill();
+    }
+
+    private PatternFill getCurrentPattern() {
+        Color color = new Color(10, 10, 10);
+        return switch (fillPatternIndex) {
+            case 1 -> PatternFill.checkerboard(10, polygonColor, color);
+            case 2 -> PatternFill.horizontalStripes(5, polygonColor, color);
+            case 3 -> PatternFill.dots(3, polygonColor, color);
+            default -> PatternFill.verticalStripes(5, polygonColor, color);
+        };
     }
 
     private Point2D getCursorPosition() {
@@ -371,7 +385,20 @@ public class Controller2D implements Controller {
         return new Point2D(mousePosition.getX(), mousePosition.getY());
     }
 
+    private boolean isInsideAnyShape(Point2D p) {
+        if (Line.isPointInsidePolygon(p, polygon)) return true;
+        for (Rectangle r : rectangles) if (Line.isPointInsidePolygon(p, r)) return true;
+        return false;
+    }
+
     private void handlePolygonPressed(Point2D newPoint, MouseEvent e) {
+        if(!fillMode) {
+            // levé tlačítko - přidání prvního bodu polygonu (nutné, jinak nejde drag prvního bodu)
+            if (polygon.size() == 0) {
+                polygon.addItem(newPoint);
+            }
+        }
+
         // pravé tlačítko - najde nejbližší bod pro tažení (změna vrcholu)
         if (e.getButton() == MouseEvent.BUTTON3) {
             // porovnání vzdálenosti kurzoru k nejbližším bodům polygonů
@@ -401,10 +428,7 @@ public class Controller2D implements Controller {
             return;
         }
 
-        // v režimu vyplňování se po kliknutí nepřidává nový bod
-        if(fillMode) {
-            return;
-        }
+        if(fillMode) return; // v režimu vyplňování se po kliknutí nepřidává nový bod
 
         // přidání nového vrcholu polygonu
         Point2D newPoint = new Point2D(e.getX(), e.getY());
@@ -443,7 +467,7 @@ public class Controller2D implements Controller {
     private void handleRectangleReleased(MouseEvent e) {
         if (rectangle == null) return;
 
-        if (rectangle.size() == 1 && isClickWithoutDrag(start, new Point2D(e.getX(), e.getY())) && !fillMode) {
+        if (rectangle.size() == 1 && Math.abs(start.getX() - e.getX()) < 3 && Math.abs(start.getY() - e.getY()) < 3 && !fillMode) {
             JOptionPane.showMessageDialog(
                     panel,
                     "Obdélník nelze vytvořit pouze kliknutím.\n" +
@@ -464,30 +488,6 @@ public class Controller2D implements Controller {
         }
     }
 
-    private boolean isClickWithoutDrag(Point2D start, Point2D end) {
-        if (start == null || end == null) return false;
-        double dx = Math.abs(start.getX() - end.getX());
-        double dy = Math.abs(start.getY() - end.getY());
-        return dx < 3 && dy < 3; // tolerance 3 px
-    }
-
-    // přepočítá clipped polygon (ořezaný pentagonem) a provede scanline vyplnění
-    private void updateClippedAndFill(Polygon shape) {
-        // oříznutí polygonu nebo obdélníku (shape) podle původního pentagonu
-        SutherlandHodgman clipper = new SutherlandHodgman();
-        Polygon clipped = clipper.clip(shape, pentagon);
-
-        scanLine = new ScanLine(panel.getRaster(), clipped, polygonRasterizer);
-        PatternFill pattern = switch (fillPatternIndex) {
-            case 1 -> PatternFill.checkerboard(10, polygonColor, RasterBI.getBackgroundColor());
-            case 2 -> PatternFill.horizontalStripes(5, polygonColor, RasterBI.getBackgroundColor());
-            case 3 -> PatternFill.dots(3, polygonColor, RasterBI.getBackgroundColor());
-            default -> PatternFill.verticalStripes(5, polygonColor, RasterBI.getBackgroundColor());
-        };
-        scanLine.setPattern(pattern);
-        scanLine.fill();
-    }
-
     public void drawScene() {
         panel.getRaster().clear(); // aby se stále dokola nevykreslovaly pružné čáry, ale jen 1
 
@@ -501,8 +501,7 @@ public class Controller2D implements Controller {
             polygonRasterizer.rasterize(r);
         }
 
-        // ořízne polygon podle pentagonu a vyplní vzniklý tvar
-        updateClippedAndFill(polygon);
+        updateClippedAndFill(polygon); // ořízne polygon podle pentagonu a vyplní vzniklý tvar
 
         for (Rectangle r : rectangles) {
             updateClippedAndFill(r);
