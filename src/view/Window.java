@@ -54,6 +54,7 @@ public class Window extends JFrame {
         leftPanel.add(new JLabel("Vymazání plátna: [C]"));
         leftPanel.add(new JLabel("Změna barvy útvarů: [B]"));
         leftPanel.add(new JLabel("Odebrání poslední úsečky polygonu: [Z]"));
+        leftPanel.add(new JLabel("Uzavření polygonu: [ESCAPE]"));
 
         JPanel rightPanel = new JPanel();
         rightPanel.setLayout(new BoxLayout(rightPanel, BoxLayout.Y_AXIS));
