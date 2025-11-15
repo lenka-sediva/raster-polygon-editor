@@ -141,7 +141,7 @@ public class Polygon {
         for (int i = 0; i < polygon.size(); i++) {
             Point2D p1 = polygon.get(i);
             Point2D p2 = polygon.get((i + 1) % polygon.size());
-            sum += (p2.getX() - p1.getX()) * (p2.getY() + p1.getY());;
+            sum += (p2.getX() - p1.getX()) * (p2.getY() + p1.getY());
         }
 
         return sum < 0 ? 1 : -1; // CCW = 1, CW = -1
