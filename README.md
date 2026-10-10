@@ -4,6 +4,8 @@ Interaktivní 2D rastrový editor polygonů a obdélníků v Javě (Swing), vytv
 
 Aplikace nepoužívá vestavěné kreslicí funkce Javy. Úsečky, vyplňování i ořezávání jsou implementované vlastními algoritmy, které zapisují přímo do pixelového rastru (`BufferedImage`).
 
+![Ukázka aplikace](docs/images/screenshot.png)
+
 ## Funkce
 
 - **Kreslení polygonů**: přidávání vrcholů myší, pružná (čárkovaná, barevně přechodová) čára k poslednímu i prvnímu vrcholu, uzavření polygonu a kreslení dalších objektů.
