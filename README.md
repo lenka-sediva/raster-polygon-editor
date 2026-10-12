@@ -44,7 +44,30 @@ V režimu vyplňování (`F`) nelze vytvářet nové útvary, kliknutí uvnitř 
 
 ## Spuštění
 
-Potřebujete **JDK 21 nebo novější** (kód používá `List.getLast()` a `switch` výrazy). Projekt nemá žádné externí závislosti ani build nástroj.
+Potřebujete **Javu 21 nebo novější** (kód používá `List.getLast()` a `switch` výrazy). Projekt nemá žádné externí závislosti ani build nástroj.
+
+### Stažení hotové verze
+
+Na stránce [Releases](https://github.com/lenka-sediva/basic-polygons/releases) stáhněte soubor `basic-polygons.jar` a spusťte ho dvojklikem, nebo z příkazové řádky:
+
+```bash
+java -jar basic-polygons.jar
+```
+
+### Sestavení JAR souboru
+
+```bash
+mkdir -p build/classes
+javac --release 21 -encoding UTF-8 -d build/classes $(find src -name "*.java")
+jar --create --file build/basic-polygons.jar --main-class App -C build/classes .
+```
+
+V PowerShellu:
+
+```powershell
+javac --release 21 -encoding UTF-8 -d build/classes (Get-ChildItem -Recurse src -Filter *.java).FullName
+jar --create --file build/basic-polygons.jar --main-class App -C build/classes .
+```
 
 ### IntelliJ IDEA
 
