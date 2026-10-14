@@ -116,7 +116,7 @@ public class Line {
         double x4 = q2.getX(), y4 = q2.getY();
 
         double denom = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
-        if (denom == 0) throw new IllegalArgumentException("Rovnoběžné hrany – nelze spočítat průsečík");
+        if (denom == 0) throw new IllegalArgumentException("Parallel edges - cannot compute intersection");
 
         double px = ((x1*y2 - y1*x2)*(x3 - x4) - (x1 - x2)*(x3*y4 - y3*x4)) / denom;
         double py = ((x1*y2 - y1*x2)*(y3 - y4) - (y1 - y2)*(x3*y4 - y3*x4)) / denom;

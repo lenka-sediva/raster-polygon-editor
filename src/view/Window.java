@@ -35,7 +35,7 @@ public class Window extends JFrame {
         Font bigFont = new Font("SansSerif", Font.BOLD, 16);
         UIManager.put("Label.font", bigFont); // nastaví výchozí font pro všechny JLabel
 
-        JLabel helpLabel = new JLabel("Nápověda");
+        JLabel helpLabel = new JLabel("Help");
         helpLabel.setForeground(Color.WHITE); // bílý text
         helpLabel.setBackground(new Color(30, 144, 255)); // modré pozadí (DogerBlue)
         helpLabel.setOpaque(true);
@@ -49,20 +49,20 @@ public class Window extends JFrame {
 
         JPanel leftPanel = new JPanel();
         leftPanel.setLayout(new BoxLayout(leftPanel, BoxLayout.Y_AXIS));
-        leftPanel.add(new JLabel("Přidání nového vrcholu polygonu: levé tlačítko myši"));
-        leftPanel.add(new JLabel("Přidání vrcholu na nejbližší hranu polygonu: [N]"));
-        leftPanel.add(new JLabel("Vymazání plátna: [C]"));
-        leftPanel.add(new JLabel("Změna barvy útvarů: [B]"));
-        leftPanel.add(new JLabel("Odebrání poslední úsečky polygonu: [Z]"));
-        leftPanel.add(new JLabel("Uzavření polygonu: [ESCAPE]"));
+        leftPanel.add(new JLabel("Add polygon vertex: left mouse button"));
+        leftPanel.add(new JLabel("Add vertex on the nearest polygon edge: [N]"));
+        leftPanel.add(new JLabel("Clear canvas: [C]"));
+        leftPanel.add(new JLabel("Change shape color: [B]"));
+        leftPanel.add(new JLabel("Remove last polygon line (undo): [Z]"));
+        leftPanel.add(new JLabel("Close polygon: [ESCAPE]"));
 
         JPanel rightPanel = new JPanel();
         rightPanel.setLayout(new BoxLayout(rightPanel, BoxLayout.Y_AXIS));
-        rightPanel.add(new JLabel("Posunutí vrcholu polygonu: pravé tlačítko myši"));
-        rightPanel.add(new JLabel("Smazání nejbližšího vrcholu polygonu: [R]"));
-        rightPanel.add(new JLabel("Zobrazování úseček ve 3 směrech: [SHIFT]"));
-        rightPanel.add(new JLabel("Vyplnění útvaru Seed Fill: [F]"));
-        rightPanel.add(new JLabel("Vrácení úsečky zpět: [Y]"));
+        rightPanel.add(new JLabel("Move polygon vertex: right mouse button"));
+        rightPanel.add(new JLabel("Delete nearest polygon vertex: [R]"));
+        rightPanel.add(new JLabel("Snap lines to 3 directions: [SHIFT]"));
+        rightPanel.add(new JLabel("Seed Fill mode: [F]"));
+        rightPanel.add(new JLabel("Restore removed line (redo): [Y]"));
 
         columnsPanel.add(leftPanel);
         columnsPanel.add(rightPanel);

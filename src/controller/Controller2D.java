@@ -74,7 +74,7 @@ public class Controller2D implements Controller {
         // výchozí stavy
         panel.setFillModeText("Fill mode: OFF [F]");
         panel.setDrawModeText("Mode: POLYGON [P]");
-        panel.setDrawModeShortcut("[E] pro obdélník");
+        panel.setDrawModeShortcut("[E] for rectangle");
         panel.setPatternText("Pattern: Vertical Stripes [V]");
 
         initObjects();
@@ -137,8 +137,8 @@ public class Controller2D implements Controller {
                 if (fillMode && clickedColor != RasterBI.getBackgroundColor().getRGB()) {
                     JOptionPane.showMessageDialog(
                             panel,
-                            "Tato oblast už je vyplněná.",
-                            "Nelze vyplnit",
+                            "This area is already filled.",
+                            "Cannot fill",
                             JOptionPane.WARNING_MESSAGE
                     );
                     return;
@@ -158,8 +158,8 @@ public class Controller2D implements Controller {
                 if(fillMode && !isInsideAnyShape(newPoint)) {
                     drawScene(); // překreslení scény, aby zmizela pružná čára
                     JOptionPane.showMessageDialog(panel,
-                            "Nelze tvořit nové útvary v režimu vyplňování.\nStisknutím [F] režim vypnete.",
-                            "Režim vyplňování",
+                            "New shapes cannot be created in fill mode.\nPress [F] to turn fill mode off.",
+                            "Fill mode",
                             JOptionPane.WARNING_MESSAGE);
                     start = null; // reset obdélníku
                     return; // nedovolí pokračovat v kreslení
@@ -254,7 +254,7 @@ public class Controller2D implements Controller {
 
                     // otevře dialog pro výběr barvy vykreslování
                     case KeyEvent.VK_B:
-                        Color selectedColor = JColorChooser.showDialog(panel, "Vyber barvu úsečky", polygonColor);
+                        Color selectedColor = JColorChooser.showDialog(panel, "Choose line color", polygonColor);
                         if (selectedColor != null) {
                             polygonColor = selectedColor;
                             liner.setColor(polygonColor);
@@ -273,14 +273,14 @@ public class Controller2D implements Controller {
                     case KeyEvent.VK_P:
                         currentMode = DrawMode.POLYGON;
                         panel.setDrawModeText("Mode: " + currentMode.name() + " [P]");
-                        panel.setDrawModeShortcut("[E] pro obdélník");
+                        panel.setDrawModeShortcut("[E] for rectangle");
                         break;
 
                     // mód obdélníku
                     case KeyEvent.VK_E:
                         currentMode = DrawMode.RECTANGLE;
                         panel.setDrawModeText("Mode: " + currentMode.name() + " [E]");
-                        panel.setDrawModeShortcut("[P] pro polygon");
+                        panel.setDrawModeShortcut("[P] for polygon");
                         break;
 
                     // přepínání vzorů po ořezu pro scan line
@@ -453,9 +453,9 @@ public class Controller2D implements Controller {
         if (rectangle.size() == 1 && Math.abs(start.getX() - e.getX()) < 3 && Math.abs(start.getY() - e.getY()) < 3 && !fillMode) {
             JOptionPane.showMessageDialog(
                     panel,
-                    "Obdélník nelze vytvořit pouze kliknutím.\n" +
-                            "Chyťte myší bod a táhněte pro vytvoření základny.",
-                    "Chyba kreslení obdélníku",
+                    "A rectangle cannot be created with a single click.\n" +
+                            "Press the mouse button and drag to create the base.",
+                    "Rectangle drawing error",
                     JOptionPane.WARNING_MESSAGE
             );
             start = null;

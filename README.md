@@ -1,60 +1,60 @@
-# 2D malování
+# 2D Painting
 
-Interaktivní 2D rastrový editor polygonů a obdélníků v Javě (Swing), vytvořený jako úloha do předmětu **PGRF1 2025** (autorka: Lenka Šedivá).
+An interactive 2D raster editor for polygons and rectangles written in Java (Swing), created as an assignment for the **PGRF1 2025** course (author: Lenka Šedivá).
 
-Aplikace nepoužívá vestavěné kreslicí funkce Javy. Úsečky, vyplňování i ořezávání jsou implementované vlastními algoritmy, které zapisují přímo do pixelového rastru (`BufferedImage`).
+The application does not use Java's built-in drawing functions. Line drawing, filling and clipping are implemented with custom algorithms that write directly into a pixel raster (`BufferedImage`).
 
-![Ukázka aplikace](docs/images/screenshot.png)
+![Application screenshot](docs/images/screenshot_CZ.png)
 
-## Funkce
+## Features
 
-- **Kreslení polygonů**: přidávání vrcholů myší, pružná (čárkovaná, barevně přechodová) čára k poslednímu i prvnímu vrcholu, uzavření polygonu a kreslení dalších objektů.
-- **Kreslení obdélníků**: tažením myši se zadá základna, třetím kliknutím výška. Obdélník může být libovolně natočený.
-- **Editace vrcholů**: posun vrcholu tažením, vložení nového vrcholu na nejbližší hranu, smazání nejbližšího vrcholu.
-- **Zarovnání úseček**: se stisknutým `Shift` se úsečka přichytí na vodorovný, svislý nebo diagonální (45°) směr.
-- **Undo / Redo** posledních přidaných úseček.
-- **Ořezávání**: každý polygon i obdélník se ořezává konvexním pětiúhelníkem (algoritmus Sutherland–Hodgman). Ořezaná oblast se vyplní vzorem pomocí Scan Line. I vrcholy pětiúhelníku lze posouvat.
-- **Vyplňování Seed Fill**: v režimu vyplňování se oblast vybarví záplavovým algoritmem od místa kliknutí (křížový vzor).
-- **Vzory výplně**: svislé pruhy, šachovnice, vodorovné pruhy, tečky (a křížový vzor pro Seed Fill).
-- **Výběr barvy** útvarů přes `JColorChooser`.
-- Při změně velikosti okna se vytvoří nový rastr a scéna se překreslí.
+- **Polygon drawing**: add vertices with the mouse, rubber-band (dashed, color-gradient) lines to the last and first vertex, close the polygon and draw further objects.
+- **Rectangle drawing**: drag the mouse to define the base, then click a third time to set the height. The rectangle can be rotated arbitrarily.
+- **Vertex editing**: move a vertex by dragging, insert a new vertex on the nearest edge, delete the nearest vertex.
+- **Line snapping**: while holding `Shift`, a line snaps to the horizontal, vertical or diagonal (45°) direction.
+- **Undo / Redo** of the most recently added lines.
+- **Clipping**: every polygon and rectangle is clipped by a convex pentagon (Sutherland–Hodgman algorithm). The clipped area is filled with a pattern using Scan Line. The pentagon's vertices can be moved too.
+- **Seed Fill**: in fill mode, the area is filled using a flood-fill algorithm starting at the clicked point (cross pattern).
+- **Fill patterns**: vertical stripes, checkerboard, horizontal stripes, dots (plus a cross pattern for Seed Fill).
+- **Shape color selection** via `JColorChooser`.
+- When the window is resized, a new raster is created and the scene is redrawn.
 
-## Ovládání
+## Controls
 
-| Akce | Ovládání |
+| Action | Control |
 |---|---|
-| Přidání vrcholu polygonu / bodu obdélníku | levé tlačítko myši |
-| Posunutí vrcholu (polygon i ořezávací pětiúhelník) | pravé tlačítko myši + tažení |
-| Zarovnání úsečky na 3 směry (vodorovně / svisle / 45°) | držet `Shift` |
-| Přidání vrcholu na nejbližší hranu (pod kurzorem) | `N` |
-| Smazání nejbližšího vrcholu | `R` |
-| Uzavření polygonu a začátek nového | `Esc` |
-| Odebrání poslední úsečky (undo) | `Z` |
-| Vrácení odebrané úsečky (redo) | `Y` |
-| Změna barvy | `B` |
-| Zapnutí / vypnutí režimu vyplňování Seed Fill | `F` |
-| Přepnutí vzoru výplně ořezané oblasti | `V` |
-| Režim kreslení polygonu | `P` |
-| Režim kreslení obdélníku | `E` |
-| Vymazání plátna | `C` |
+| Add a polygon vertex / rectangle point | left mouse button |
+| Move a vertex (polygon and clipping pentagon) | right mouse button + drag |
+| Snap line to 3 directions (horizontal / vertical / 45°) | hold `Shift` |
+| Add a vertex on the nearest edge (under the cursor) | `N` |
+| Delete the nearest vertex | `R` |
+| Close the polygon and start a new one | `Esc` |
+| Remove the last line (undo) | `Z` |
+| Restore the removed line (redo) | `Y` |
+| Change color | `B` |
+| Toggle Seed Fill mode | `F` |
+| Switch fill pattern of the clipped area | `V` |
+| Polygon drawing mode | `P` |
+| Rectangle drawing mode | `E` |
+| Clear the canvas | `C` |
 
-**Obdélník:** stiskněte levé tlačítko v počátečním bodě, táhněte na konec základny a pusťte. Dalším kliknutím určete výšku. Samotné kliknutí bez tažení obdélník nevytvoří.
+**Rectangle:** press the left mouse button at the starting point, drag to the end of the base and release. Click again to set the height. A single click without dragging does not create a rectangle.
 
-V režimu vyplňování (`F`) nelze vytvářet nové útvary, kliknutí uvnitř útvaru spustí Seed Fill. Aktuální režim, stav vyplňování a zvolený vzor se zobrazují v levém dolním rohu plátna.
+In fill mode (`F`) new shapes cannot be created; clicking inside a shape starts Seed Fill. The current mode, fill state and selected pattern are shown in the bottom-left corner of the canvas.
 
-## Spuštění
+## Running
 
-Potřebujete **Javu 21 nebo novější** (kód používá `List.getLast()` a `switch` výrazy). Projekt nemá žádné externí závislosti ani build nástroj.
+You need **Java 21 or newer** (the code uses `List.getLast()` and `switch` expressions). The project has no external dependencies and no build tool.
 
-### Stažení hotové verze
+### Download a prebuilt version
 
-Na stránce [Releases](https://github.com/lenka-sediva/basic-polygons/releases) stáhněte soubor `basic-polygons.jar` a spusťte ho dvojklikem, nebo z příkazové řádky:
+Download `basic-polygons.jar` from the [Releases](https://github.com/lenka-sediva/basic-polygons/releases) page and run it by double-clicking, or from the command line:
 
 ```bash
 java -jar basic-polygons.jar
 ```
 
-### Sestavení JAR souboru
+### Building the JAR
 
 ```bash
 mkdir -p build/classes
@@ -62,7 +62,7 @@ javac --release 21 -encoding UTF-8 -d build/classes $(find src -name "*.java")
 jar --create --file build/basic-polygons.jar --main-class App -C build/classes .
 ```
 
-V PowerShellu:
+In PowerShell:
 
 ```powershell
 javac --release 21 -encoding UTF-8 -d build/classes (Get-ChildItem -Recurse src -Filter *.java).FullName
@@ -71,81 +71,85 @@ jar --create --file build/basic-polygons.jar --main-class App -C build/classes .
 
 ### IntelliJ IDEA
 
-Otevřete složku projektu a spusťte třídu `App` (`src/App.java`).
+Open the project folder and run the `App` class (`src/App.java`).
 
-### Příkazová řádka
+### Command line
 
 ```bash
 javac -d out $(find src -name "*.java")
 java -cp out App
 ```
 
-V PowerShellu:
+In PowerShell:
 
 ```powershell
 javac -d out (Get-ChildItem -Recurse src -Filter *.java).FullName
 java -cp out App
 ```
 
-## Struktura projektu
+## Project structure
 
-Projekt je rozdělený podle vzoru MVC:
+The project follows the MVC pattern:
 
 ```
 src/
-├── App.java                         vstupní bod, vytvoří okno a Controller2D
+├── App.java                         entry point, creates the window and Controller2D
 ├── controller/
-│   ├── Controller.java              rozhraní kontroleru
-│   ├── Controller2D.java            obsluha myši a klávesnice, stav scény, vykreslování
-│   └── Controller3D.java            prázdný základ pro budoucí 3D část
+│   ├── Controller.java              controller interface
+│   ├── Controller2D.java            mouse and keyboard handling, scene state, rendering
+│   └── Controller3D.java            empty base for a future 3D part
 ├── model/
-│   ├── objectdata/                  geometrická data
-│   │   ├── Point2D.java             bod, vzdálenosti
-│   │   ├── Line.java                úsečka, průsečíky, test bodu v polygonu
-│   │   ├── Polygon.java             seznam vrcholů, hledání nejbližšího bodu/hrany, orientace
-│   │   └── Rectangle.java           obdélník ze základny a bodu výšky
+│   ├── objectdata/                  geometric data
+│   │   ├── Point2D.java             point, distances
+│   │   ├── Line.java                line segment, intersections, point-in-polygon test
+│   │   ├── Polygon.java             vertex list, nearest point/edge lookup, orientation
+│   │   └── Rectangle.java           rectangle from a base and a height point
 │   ├── rasterdata/
-│   │   ├── Raster.java              rozhraní rastru
-│   │   └── RasterBI.java            implementace nad BufferedImage
+│   │   ├── Raster.java              raster interface
+│   │   └── RasterBI.java            implementation backed by BufferedImage
 │   └── rasterops/
 │       ├── clip/SutherlandHodgman.java
 │       ├── filler/                  Filler, ScanLine, SeedFill, PatternFill
-│       └── rasterizer/              rasterizace úseček a polygonů
+│       └── rasterizer/              line and polygon rasterization
 └── view/
-    ├── Window.java                  hlavní okno s panelem nápovědy
-    └── Panel.java                   plátno a stavový text
+    ├── Window.java                  main window with the help panel
+    └── Panel.java                   canvas and status text
 ```
 
-## Implementované algoritmy
+## Implemented algorithms
 
-### Rasterizace úseček (`model/rasterops/rasterizer`)
+### Line rasterization (`model/rasterops/rasterizer`)
 
-| Třída | Algoritmus | Použití |
+| Class | Algorithm | Usage |
 |---|---|---|
-| `LineRasterizerBresenham` | Bresenhamův algoritmus s tloušťkou čáry (kapslový efekt) | hrany útvarů (přes `FilledLineRasterizer`) |
-| `DashedLineRasterizer` | DDA, čárkovaná čára s barevným přechodem (`Gradient`) | pružná čára při kreslení |
-| `LineRasterizerTrivial` | triviální algoritmus (směrnicový tvar přímky) | ukázka, v aplikaci nepoužitý |
-| `LineRasterizerXiaolinWu` | Xiaolin Wu (anti-aliasing) | ukázka, v aplikaci nepoužitý |
-| `LineRasterizerGraphics` | vestavěné `Graphics.drawLine` | pro porovnání |
+| `LineRasterizerBresenham` | Bresenham's algorithm with line thickness (capsule effect) | shape edges (via `FilledLineRasterizer`) |
+| `DashedLineRasterizer` | DDA, dashed line with a color gradient (`Gradient`) | rubber-band line while drawing |
+| `LineRasterizerTrivial` | trivial algorithm (slope-intercept form) | example, not used in the app |
+| `LineRasterizerXiaolinWu` | Xiaolin Wu (anti-aliasing) | example, not used in the app |
+| `LineRasterizerGraphics` | built-in `Graphics.drawLine` | for comparison |
 
-`PolygonRasterizer` vykreslí uzavřený polygon jako posloupnost úseček pomocí zvoleného rasterizéru.
+`PolygonRasterizer` draws a closed polygon as a sequence of lines using the selected rasterizer.
 
-### Vyplňování (`model/rasterops/filler`)
+### Filling (`model/rasterops/filler`)
 
-- **`ScanLine`**: řádkové vyplňování polygonu. Vynechá vodorovné hrany, spočítá průsečíky hran se skenovací přímkou, seřadí je (insertion sort) a vyplní úseky mezi dvojicemi průsečíků. Nakonec obtáhne hranici.
-- **`SeedFill`**: záplavové vyplňování ve dvou variantách:
-  - omezení **podle pozadí** pomocí zásobníku (`seedFillStack`),
-  - omezení **podle barvy hranice** pomocí fronty (`seedFillQueue`).
+- **`ScanLine`**: scan-line polygon filling. Skips horizontal edges, computes intersections of the edges with the scan line, sorts them (insertion sort) and fills the spans between pairs of intersections. Finally it draws the boundary.
+- **`SeedFill`**: flood fill in two variants:
+  - bounded **by background color** using a stack (`seedFillStack`),
+  - bounded **by boundary color** using a queue (`seedFillQueue`).
 
-  Obě varianty umí 4- i 8-souvislé vyplňování a jednobarevnou výplň nebo vzor.
-- **`PatternFill`**: funkční rozhraní, které vrací barvu pro pixel `(x, y)`. Obsahuje továrny `checkerboard`, `horizontalStripes`, `verticalStripes`, `dots` a `cross`.
+  Both variants support 4- and 8-connected filling and either a solid color or a pattern.
+- **`PatternFill`**: a functional interface that returns the color for pixel `(x, y)`. Contains the factories `checkerboard`, `horizontalStripes`, `verticalStripes`, `dots` and `cross`.
 
-### Ořezávání (`model/rasterops/clip`)
+### Clipping (`model/rasterops/clip`)
 
-- **`SutherlandHodgman`**: ořez libovolného polygonu konvexním ořezávacím polygonem. Orientace ořezávacího polygonu (CW/CCW) se určuje automaticky (`Polygon.getOrientation`), takže na pořadí vrcholů nezáleží. Test „uvnitř“ používá skalární součin s normálou hrany (`Line.isInside`).
+- **`SutherlandHodgman`**: clips an arbitrary polygon by a convex clipping polygon. The orientation of the clipping polygon (CW/CCW) is detected automatically (`Polygon.getOrientation`), so vertex order does not matter. The "inside" test uses the dot product with the edge normal (`Line.isInside`).
 
-### Další geometrie
+### Other geometry
 
-- Test, zda bod leží uvnitř polygonu: paprskový algoritmus (počet průsečíků) v `Line.isPointInsidePolygon`.
-- Vzdálenost bodu od úsečky (projekce na úsečku) v `Point2D.distancePointToLine`.
-- Konstrukce obdélníku: projekce třetího bodu na normálu základny v `Rectangle.buildVertices`.
+- Point-in-polygon test: ray casting (intersection count) in `Line.isPointInsidePolygon`.
+- Distance from a point to a line segment (projection onto the segment) in `Point2D.distancePointToLine`.
+- Rectangle construction: projection of the third point onto the base normal in `Rectangle.buildVertices`.
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
