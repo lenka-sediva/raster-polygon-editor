@@ -1,10 +1,10 @@
-# 2D Painting
+# Raster Polygon Editor
 
 An interactive 2D raster editor for polygons and rectangles written in Java (Swing), created as an assignment for the **PGRF1 2025** course (author: Lenka Šedivá).
 
 The application does not use Java's built-in drawing functions. Line drawing, filling and clipping are implemented with custom algorithms that write directly into a pixel raster (`BufferedImage`).
 
-![Application screenshot](docs/images/screenshot_CZ.png)
+![Application screenshot](docs/images/screenshot.png)
 
 ## Features
 
@@ -48,10 +48,10 @@ You need **Java 21 or newer** (the code uses `List.getLast()` and `switch` expre
 
 ### Download a prebuilt version
 
-Download `basic-polygons.jar` from the [Releases](https://github.com/lenka-sediva/basic-polygons/releases) page and run it by double-clicking, or from the command line:
+Download `raster-polygon-editor.jar` from the [Releases](https://github.com/lenka-sediva/raster-polygon-editor/releases) page and run it by double-clicking, or from the command line:
 
 ```bash
-java -jar basic-polygons.jar
+java -jar raster-polygon-editor.jar
 ```
 
 ### Building the JAR
@@ -59,14 +59,14 @@ java -jar basic-polygons.jar
 ```bash
 mkdir -p build/classes
 javac --release 21 -encoding UTF-8 -d build/classes $(find src -name "*.java")
-jar --create --file build/basic-polygons.jar --main-class App -C build/classes .
+jar --create --file build/raster-polygon-editor.jar --main-class App -C build/classes .
 ```
 
 In PowerShell:
 
 ```powershell
 javac --release 21 -encoding UTF-8 -d build/classes (Get-ChildItem -Recurse src -Filter *.java).FullName
-jar --create --file build/basic-polygons.jar --main-class App -C build/classes .
+jar --create --file build/raster-polygon-editor.jar --main-class App -C build/classes .
 ```
 
 ### IntelliJ IDEA
